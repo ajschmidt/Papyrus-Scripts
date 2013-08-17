@@ -112,7 +112,7 @@ Event OnTriggerEnter(ObjectReference akActionRef)
 				Ingots08.AddItem(akActionRef, 1, true)
 				Ingots08.Activate(akActionRef)
 			endif
-		elseif (akActionRef.HasKeyword(VendorItemBook))
+		elseif (isBook(akActionRef))
 			if (Books01 && !Books01.isFull())
 				Books01.AddItem(akActionRef, 1, true)
 				Books01.Activate(akActionRef)
@@ -160,25 +160,45 @@ Event OnTriggerEnter(ObjectReference akActionRef)
 				Jewelry02.AddItem(akActionRef, 1, true)
 				Jewelry02.Activate(akActionRef)
 			endif
-		else 
-			if (Table01 && !Table01.isFull())
-				Table01.AddItem(akActionRef, 1, true)
-				Table01.Activate(akActionRef)
-			elseif (Table02 )
-				Table02.AddItem(akActionRef, 1, true)
-				Table02.Activate(akActionRef)
-			endif
+	;	else 
+	;		if (Table01 && !Table01.isFull())
+		;		Table01.AddItem(akActionRef, 1, true)
+		;		Table01.Activate(akActionRef)
+		;	elseif (Table02 )
+		;		Table02.AddItem(akActionRef, 1, true)
+		;		Table02.Activate(akActionRef)
+		;	endif
    
 		endif
 	endif
 EndEvent
  
+bool Function isBook(ObjectReference akActionRef)
+
+	if (akActionRef.HasKeyword(VendorItemBook) || akActionRef.HasKeyword(VendorItemSpellTome))
+		return true
+	else
+		return (akActionRef.GetBaseObject() as Book)
+	endif
+	
+endFunction
+
 bool Function isIngot(ObjectReference akActionRef)
 
-    return (akActionRef.HasKeyword(VendorItemOreIngot))
+	if (akActionRef.HasKeyword(VendorItemOreIngot))
+		return true
+	else
+		return false 
+	endif
+	
 endFunction
 
 bool Function isPotion(ObjectReference akActionRef)
-    return (akActionRef.HasKeyword(VendorItemPotion) || akActionRef.HasKeyword(VendorItemPoison))
+	if (akActionRef.HasKeyword(VendorItemPotion) || akActionRef.HasKeyword(VendorItemPoison))
+		return true
+	else
+		return (akActionRef.GetBaseObject() as Potion) 
+	endif
+
 endFunction
 

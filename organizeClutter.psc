@@ -123,12 +123,12 @@ Event OnTriggerEnter(ObjectReference akActionRef)
 				Books03.AddItem(akActionRef, 1, true)
 				Books03.Activate(akActionRef)
 			endif
-		elseif(akActionRef.HasKeyword(VendorItemSpellTome))
+		elseif(isSpellBook(akActionRef))
 			if (Books03)
 				Books03.AddItem(akActionRef,1,true)
 				Books03.Activate(akActionRef)
 			endif
-		elseif (akActionRef.HasKeyword(VendorItemGem))
+		elseif (isGem(akActionRef))
 			if (Gems01 && !Gems01.isFull())
 				Gems01.AddItem(akActionRef, 1, true)
 				Gems01.Activate(akActionRef)
@@ -136,7 +136,7 @@ Event OnTriggerEnter(ObjectReference akActionRef)
 				Gems02.AddItem(akActionRef, 1, true)
 				Gems02.Activate(akActionRef)
 			endif
-		elseif (akActionRef.HasKeyword(VendorItemGem))
+		elseif (isSoulGem(akActionRef))
 			if (SoulGems01 && !SoulGems01.isFull())
 				SoulGems01.AddItem(akActionRef, 1, true)
 				SoulGems01.Activate(akActionRef)
@@ -144,7 +144,7 @@ Event OnTriggerEnter(ObjectReference akActionRef)
 				SoulGems02.AddItem(akActionRef, 1, true)
 				SoulGems02.Activate(akActionRef)
 			endif
-		elseif (akActionRef.HasKeyword(VendorItemScroll))
+		elseif (isScroll(akActionRef))
 			if (Scrolls01 && !Scrolls01.isFull())
 				Scrolls01.AddItem(akActionRef, 1, true)
 				Scrolls01.Activate(akActionRef)
@@ -183,6 +183,16 @@ bool Function isBook(ObjectReference akActionRef)
 	
 endFunction
 
+bool Function isSpellBook(ObjectReference akActionRef)
+
+	if (akActionRef.HasKeyword(VendorItemSpellTome))
+		return true
+	;else
+		;return (akActionRef.GetBaseObject() as Book)
+	endif
+	
+endFunction
+
 bool Function isIngot(ObjectReference akActionRef)
 
 	if (akActionRef.HasKeyword(VendorItemOreIngot))
@@ -202,3 +212,32 @@ bool Function isPotion(ObjectReference akActionRef)
 
 endFunction
 
+bool Function isGem(ObjectReference akActionRef)
+
+	if (akActionRef.HasKeyword(VendorItemGem))
+		return true
+	;else
+		;return (akActionRef.GetBaseObject() as Book)
+	endif
+	
+endFunction
+
+bool Function isSoulGem(ObjectReference akActionRef)
+
+	if (akActionRef.HasKeyword(VendorItemGem))
+		return true
+	;else
+		;return (akActionRef.GetBaseObject() as Book)
+	endif
+	
+endFunction
+
+bool Function isScroll(ObjectReference akActionRef)
+
+	if (akActionRef.GetBaseObject().HasKeyword(VendorItemScroll))
+		return true
+	;else
+		;return (akActionRef.GetBaseObject() as Book)
+	endif
+	
+endFunction

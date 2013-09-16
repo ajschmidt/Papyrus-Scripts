@@ -1,4 +1,4 @@
-Scriptname autoDeckShelfContainerScript extends ObjectReference  
+Scriptname autoDeckShelfContainerScript extends autoDeckContainerBase  
 
 import debug
 import utility
@@ -25,10 +25,7 @@ Keyword Property BookShelfBook15 Auto
 Keyword Property BookShelfBook16 Auto
 Keyword Property BookShelfBook17 Auto
 Keyword Property BookShelfBook18 Auto
-Keyword Property BookShelfTrigger01 Auto
-Keyword Property BookShelfTrigger02 Auto
-Keyword Property BookShelfTrigger03 Auto
-Keyword Property BookShelfTrigger04 Auto
+Keyword Property VendorItemGem Auto
 Keyword Property VendorItemOreIngot Auto
 Keyword Property VendorItemPotion Auto
 Keyword Property VendorItemPoison Auto
@@ -72,45 +69,9 @@ ObjectReference Property PlacedBook17Ref Auto Hidden
 ObjectReference Property PlacedBook16Ref Auto Hidden
 ObjectReference Property PlacedBook18Ref Auto Hidden
 {List of Placed Book Refs}
-Int Property CurrentBookAmount Auto Hidden
-Int Property MaxBooksAllowed Auto Hidden
-Bool Property adAlreadyLoaded = FALSE Auto Hidden
-
-
-ObjectReference Property BookMarkerStart Auto Hidden 
-ObjectReference Property BookMarkerEnd Auto Hidden 
-ObjectReference Property BookShelfTrigger01Ref Auto Hidden
-ObjectReference Property BookShelfTrigger02Ref Auto Hidden
-ObjectReference Property BookShelfTrigger03Ref Auto Hidden
-ObjectReference Property BookShelfTrigger04Ref Auto Hidden
-
-Form[] Property PlacedBooks Auto Hidden
-{List of Placed Book Forms}
-
-ObjectReference[] Property PlacedBooksRef Auto Hidden
-{List of Placed Book Refs}
 
 Bool Property adAlreadyLoaded2 = FALSE Auto Hidden
 Bool Property adAlreadyLoaded8 = FALSE Auto Hidden
-{Whether this script has already went through it's OnCellLoad() Event}
-
-Bool Property BlockBooks = FALSE Auto Hidden
-{Used for when you can't place any more books}
-
-Message Property BookShelfFirstActivateMESSAGE Auto
-{Display message when the player activates a bookshelf for the first time.  Only displays once.}
-
-Message Property BookShelfNoMoreRoomMESSAGE Auto
-{Displayed message for when the amount of books the player is placing excedes the shelf limit.}
-
-Message Property BookShelfNotABookMESSAGE Auto
-{Message displayed when the player places a non book form in the container.}
-
-Message Property BookShelfRoomLeftMESSAGE Auto
-{Notification that tells the player how much room is left on the shelf upon first activating it.}
-
-GlobalVariable Property BookShelfGlobal Auto
-{Global showing whether or not the player has ever activated a bookshelf}
 
 float minSize = 1.2
 float space = 0.3
@@ -140,11 +101,6 @@ float[] ingotR2
 float[] ingotR3
 float[] ingotR4
 int stackedIngots
-float[] scrollR1
-float[] scrollR2
-float[] scrollR3
-float[] scrollR4
-int stackedScrolls
 
 EVENT OnCellLoad()
         load()
@@ -152,7 +108,6 @@ endEVENT
 
 
 EVENT OnActivate(ObjectReference akActionRef)
-        ;load()
 	BlockActivate()
 	self.BlockActivation(true)
 	if (BookShelfGlobal.GetValue() == 0)
@@ -277,18 +232,8 @@ Function BlockActivate()
 	endwhile
 endFunction
 
-;Function UnBlockActivate()
-;	int i=0
-;	while i<NumBooks
-;		if PlacedbooksRef[i]
-;			PlacedBooksRef[i].BlockActivation(FALSE)
-;		endif
-;		i+=1
-;	endwhile
-;endFunction
-
-
 Function RemoveBooks(Form BookBase, Int BookAmount)
+	;Debug.TraceAndBox("autoDeckShelfContainer.RemoveBooks()")
 	if GetState() != "PlacingBooks"
 		int tempEnd = NumBooks
 		While BookAmount > 0
@@ -410,26 +355,22 @@ ObjectReference Function UpdateSingleBook(Form TargetBook, Int index)
    ObjectReference retVal
   ;Debug.TraceAndBox("UpdateSingleBook, TargetBook: "+TargetBook)
    if TargetBook
-      bool isbook = (TargetBook as Book)
-      bool isBottle = (TargetBook as Potion || TargetBook.haskeyword(VendorItemPoison)|| TargetBook.hasKeyWord(VendorItemFood)) 
-      retVal = BookMarkerEnd.PlaceAtMe(TargetBook)
-      retVal.BlockActivation()
+	retVal = BookMarkerEnd.PlaceAtMe(TargetBook)
+	retVal.BlockActivation()
   ;Debug.TraceAndBox("UpdateSingleBook, PlaceAtMe.TargetBook: "+BookMarkerStart.GetPositionX()+","+BookMarkerStart.GetPositionY()+","+BookMarkerStart.GetPositionZ())
   ;Debug.TraceAndBox("UpdateSingleBook, retVal 1: x="+retVal.GetPositionX()+", y="+retVal.GetPositionY()+", z="+retVal.GetPositionZ())
 		
       float orientAngle = 0.0
       int orient
-      if isbook
-         orient = 0
-      elseif (retVal.getLength() < retVal.getWidth()) || (retVal.getLength() > (MarkerLength * 1.1))
+      if (retVal.getLength() < retVal.getWidth()) || (retVal.getLength() > (MarkerLength * 1.1))
          orient = 1
          orientAngle += 90.0
       else
          orient = 2
       endif
       if (TargetBook as autoDeckUBRotateItem)
-         ;Debug.TraceAndBox("UpdateSingleBook, UBRotate: "+OrientAngle)
-         OrientAngle += 180.0
+         ;Debug.TraceAndBox("UpdateSingleBook, UBRotate: "+orientAngle)
+         orientAngle += 180.0
       endif
 		
       float bookAmt = getBookAmount(retVal, orient)
@@ -437,119 +378,14 @@ ObjectReference Function UpdateSingleBook(Form TargetBook, Int index)
          BookOffset += (bookAmt - MarkerHeight)/(TotalDistance*2)
       endif
 
-      float dx=xDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance)) ;-(MarkerHeight/2.0)
-      float dy=yDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance))
-      float dz=zDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance))
-		
-      ;Debug.TraceAndBox("UpdateSingleBook index==0, BookOffset: "+BookOffset+", bookAmt: "+bookAmt+", MarkerHeight: "+MarkerHeight+", TotalDistance: "+TotalDistance)
-      ;Debug.TraceAndBox("UpdateSingleBook, dx: "+dx+", dy: "+dy+", dz: "+dz+", orient: "+orient)
-        if VerticalBooks
-		
-			if TargetBook.hasKeyword(VendorItemOreIngot)
-				int i=0
-				bool b=false
-				while !b && i<ingotR4.length - 3
-					if ingotR4[i]==0 && ingotR3[i]>0 && ingotR3[i+1]>0
-						dz += retVal.getHeight() * 3.3
-						dx = xDist*(ingotR3[i] + ingotR3[i+1])/2.0
-						dy = yDist*(ingotR3[i] + ingotR3[i+1])/2.0
-						ingotR4[i]=(ingotR3[i] + ingotR3[i+1])/2.0
-						b=true
-					endif
-					i+=1
-				endwhile
-				i=0
-				while !b && i<ingotR3.length - 2
-					if ingotR3[i]==0 && ingotR2[i]>0 && ingotR2[i+1]>0
-						dz += retVal.getHeight() * 2.2
-						dx = xDist*(ingotR2[i] + ingotR2[i+1])/2.0
-						dy = yDist*(ingotR2[i] + ingotR2[i+1])/2.0
-						ingotR3[i]=(ingotR2[i] + ingotR2[i+1])/2.0
-						b=true
-					endif
-					i+=1
-				endwhile
-				i=0
-				while !b && i<ingotR2.length - 1
-					if ingotR2[i]==0 && ingotR1[i]>0 && ingotR1[i+1]>0
-						dz += retVal.getHeight() * 1.1
-						dx = xDist*(ingotR1[i] + ingotR1[i+1])/2.0
-						dy = yDist*(ingotR1[i] + ingotR1[i+1])/2.0
-						ingotR2[i]=(ingotR1[i] + ingotR1[i+1])/2.0
-						b=true
-					endif
-					i+=1
-				endwhile
-				if !b
-					ingotR1[index - stackedIngots]=bookOffset
-				else
-					BookOffset-=bookAmt/TotalDistance
-					stackedIngots += 1
-				endif
-			endif
-			
-			if TargetBook as Scroll
-				int i=0
-				bool b=false
-			;	while !b && i<scrollR4.length - 3
-			;		if scrollR4[i]==0 && scrollR3[i]>0 && scrollR3[i+1]>0
-			;			dz += retVal.getHeight() * 3.3
-			;			dx = xDist*(scrollR3[i] + scrollR3[i+1])/2.0
-			;			dy = yDist*(scrollR3[i] + scrollR3[i+1])/2.0
-			;			scrollR4[i]=(scrollR3[i] + scrollR3[i+1])/2.0
-			;			b=true
-			;		endif
-			;		i+=1
-			;	endwhile
-				i=0
-				while !b && i<scrollR3.length - 2
-					if scrollR3[i]==0 && scrollR2[i]>0 && scrollR2[i+1]>0
-						dz += retVal.getHeight() * 2.2
-						dx = xDist*(scrollR2[i] + scrollR2[i+1])/2.0
-						dy = yDist*(scrollR2[i] + scrollR2[i+1])/2.0
-						scrollR3[i]=(scrollR2[i] + scrollR2[i+1])/2.0
-						b=true
-        ;Debug.TraceAndBox("UpdateSingleBook 02, dx: "+dx+", dy: "+dy+", dz: "+dz)
-					endif
-					i+=1
-				endwhile
-				i=0
-				while !b && i<scrollR2.length - 1
-					if scrollR2[i]==0 && scrollR1[i]>0 && scrollR1[i+1]>0
-						dz += retVal.getHeight() * 1.1
-						dx = xDist*(scrollR1[i] + scrollR1[i+1])/2.0
-						dy = yDist*(scrollR1[i] + scrollR1[i+1])/2.0
-						scrollR2[i]=(scrollR1[i] + scrollR1[i+1])/2.0
-						b=true
-        ;Debug.TraceAndBox("UpdateSingleBook 03, dx: "+dx+", dy: "+dy+", dz: "+dz)
-					endif
-					i+=1
-				endwhile
-				if !b
-					scrollR1[index - stackedScrolls]=bookOffset
-				else
-					BookOffset-=bookAmt/TotalDistance
-					stackedScrolls += 1
-				endif
-			endif
-			
-			if isBook && retVal.getWidth() > 0
-				dz += (retVal.getWidth() - MarkerWidth)/2.0
-			elseif isBottle 
-                                retVal = positionBottle(retVal,orient,dx,dy,dz) 
-			elseif !isBook && retVal.getHeight() > 0
-				dz += (retVal.getHeight() - MarkerWidth)/2.0 ;Debug.TraceAndBox("UpdateSingleBook adjust dz, dx: "+dx+", dy: "+dy+", dz: "+dz)
-			endif
+	if VerticalBooks
+		if TargetBook.hasKeyword(VendorItemOreIngot)
+			retVal = positionIngot(retVal, index, orient, orientAngle)
+		elseif  retVal.getHeight() > 0
+			retVal = positionOther(retVal, orient, orientAngle)
 		endif
-		if orient == 0 && !isBottle
-			retVal.moveTo(BookMarkerStart,dx,dy,dz)
-        ;Debug.TraceAndBox("UpdateSingleBook moveTo, BookMarkerStart: "+BookMarkerStart+", dx: "+dx+", dy: "+dy+", dz: "+dz)
-		elseif !isBottle
-			retVal.setAngle(0, 0, (MarkerAngle - 90.0)*OrientMult + OrientAngle)
-        ;Debug.TraceAndBox("UpdateSingleBook setAngle, Angle: "+((MarkerAngle - 90.0)*OrientMult + OrientAngle))
-			retVal.moveTo(BookMarkerStart,dx,dy,dz, false)
-        ;Debug.TraceAndBox("UpdateSingleBook moveTo, BookMarkerStart: "+BookMarkerStart+", dx: "+dx+", dy: "+dy+", dz: "+dz)
-		endif
+	endif
+
         ;Debug.TraceAndBox("UpdateSingleBook p2, retVal: x="+retVal.GetPositionX()+", y="+retVal.GetPositionY()+", z="+retVal.GetPositionZ())
         ;Debug.TraceAndBox("UpdateSingleBook p2, BookMarkerStart: x="+BookMarkerStart.GetPositionX()+", y="+BookMarkerStart.GetPositionY()+", z="+BookMarkerStart.GetPositionZ())
 		
@@ -570,7 +406,106 @@ ObjectReference Function UpdateSingleBook(Form TargetBook, Int index)
 	return retVal
 EndFunction
 
-ObjectReference Function positionBottle(ObjectReference retVal, int orient, float dx, float dy, float dz)
+ObjectReference Function positionBook(ObjectReference retVal, int orient, float orientAngle)
+	float dx=xDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance)) ;-(MarkerHeight/2.0)
+	float dy=yDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance))
+	float dz=zDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance))
+	dz += (retVal.getWidth() - MarkerWidth)/2.0
+
+	if orient == 0 
+		retVal.moveTo(BookMarkerStart,dx,dy,dz)
+	else
+		retVal.setAngle(0, 0, (MarkerAngle - 90.0)*OrientMult + orientAngle)
+		retVal.moveTo(BookMarkerStart,dx,dy,dz, false)
+	endif
+
+	return retVal
+		
+EndFunction
+
+ObjectReference Function positionOther(ObjectReference retVal, int orient, float orientAngle)
+	float dx=xDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance)) ;-(MarkerHeight/2.0)
+	float dy=yDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance))
+	float dz=zDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance))
+	;dz += (retVal.getHeight() - MarkerWidth)/2.0 
+	dz -=  14.0
+		;Debug.TraceAndBox("UpdateSingleBook adjust dz, dx: "+dx+", dy: "+dy+", dz: "+dz)
+
+	if orient == 0 
+		retVal.moveTo(BookMarkerStart,dx,dy,dz)
+	else
+		retVal.setAngle(0, 0, (MarkerAngle - 90.0)*OrientMult + orientAngle)
+		retVal.moveTo(BookMarkerStart,dx,dy,dz, false)
+	endif
+
+	return retVal
+		
+EndFunction
+
+ObjectReference Function positionIngot(ObjectReference retVal, int index, int orient, float orientAngle)
+	float dx=xDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance)) ;-(MarkerHeight/2.0)
+	float dy=yDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance))
+	float dz=zDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance))
+	int i=0
+	bool b=false
+	while !b && i<ingotR4.length - 3
+		if ingotR4[i]==0 && ingotR3[i]>0 && ingotR3[i+1]>0
+			dz += retVal.getHeight() * 3.3
+			dx = xDist*(ingotR3[i] + ingotR3[i+1])/2.0
+			dy = yDist*(ingotR3[i] + ingotR3[i+1])/2.0
+			ingotR4[i]=(ingotR3[i] + ingotR3[i+1])/2.0
+			b=true
+		endif
+		i+=1
+	endwhile
+	i=0
+	while !b && i<ingotR3.length - 2
+		if ingotR3[i]==0 && ingotR2[i]>0 && ingotR2[i+1]>0
+			dz += retVal.getHeight() * 2.2
+			dx = xDist*(ingotR2[i] + ingotR2[i+1])/2.0
+			dy = yDist*(ingotR2[i] + ingotR2[i+1])/2.0
+			ingotR3[i]=(ingotR2[i] + ingotR2[i+1])/2.0
+			b=true
+		endif
+		i+=1
+	endwhile
+	i=0
+	while !b && i<ingotR2.length - 1
+		if ingotR2[i]==0 && ingotR1[i]>0 && ingotR1[i+1]>0
+			dz += retVal.getHeight() * 1.1
+			dx = xDist*(ingotR1[i] + ingotR1[i+1])/2.0
+			dy = yDist*(ingotR1[i] + ingotR1[i+1])/2.0
+			ingotR2[i]=(ingotR1[i] + ingotR1[i+1])/2.0
+			b=true
+		endif
+		i+=1
+	endwhile
+	if !b
+		ingotR1[index - stackedIngots]=bookOffset
+	else
+		float bookAmt = getBookAmount(retVal, orient)
+		BookOffset-=bookAmt/TotalDistance
+		stackedIngots += 1
+	endif
+
+	if orient == 0 
+		retVal.moveTo(BookMarkerStart,dx,dy,dz)
+        ;Debug.TraceAndBox("UpdateSingleBook moveTo, BookMarkerStart: "+BookMarkerStart+", dx: "+dx+", dy: "+dy+", dz: "+dz)
+	else
+		retVal.setAngle(0, 0, (MarkerAngle - 90.0)*OrientMult + orientAngle)
+        ;Debug.TraceAndBox("UpdateSingleBook setAngle, Angle: "+((MarkerAngle - 90.0)*OrientMult + orientAngle))
+		retVal.moveTo(BookMarkerStart,dx,dy,dz, false)
+        ;Debug.TraceAndBox("UpdateSingleBook moveTo, BookMarkerStart: "+BookMarkerStart+", dx: "+dx+", dy: "+dy+", dz: "+dz)
+	endif
+	return retVal
+EndFunction
+
+
+ObjectReference Function positionBottle(ObjectReference retVal, int orient)
+	float dx=xDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance)) ;-(MarkerHeight/2.0)
+	float dy=yDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance))
+	float dz=zDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance))
+
 	if retVal.getHeight() > 0
 		dz += (retVal.getHeight() - MarkerWidth)/2.0 ;
  	endif
@@ -593,11 +528,6 @@ Function UpdateBooks()
 	ingotR3 = new float[128]
 	ingotR4 = new float[128]
 	stackedIngots = 0
-	scrollR1 = new float[128]
-	scrollR2 = new float[128]
-	scrollR3 = new float[128]
-	;scrollR4 = new float[128]
-	stackedScrolls = 0
 	;Start updating book locations
 	BookOffset=0
 	int i=0

@@ -1,43 +1,45 @@
 Scriptname organizeClutter extends ObjectReference  
 {Sorts clutter onto shelves}
+import debug
+import utility
 
-autoDeckShelfContainerScript Property Potions01  Auto  
-autoDeckShelfContainerScript Property Potions02  Auto  
-autoDeckShelfContainerScript Property Potions03  Auto  
-autoDeckShelfContainerScript Property Potions04  Auto  
-autoDeckShelfContainerScript Property Potions05  Auto  
-autoDeckShelfContainerScript Property Potions06  Auto  
-autoDeckShelfContainerScript Property Potions07  Auto  
-autoDeckShelfContainerScript Property Potions08  Auto  
-autoDeckShelfContainerScript Property Potions09  Auto  
+autoDeckContainerBase Property Potions01  Auto  
+autoDeckContainerBase Property Potions02  Auto  
+autoDeckContainerBase Property Potions03  Auto  
+autoDeckContainerBase Property Potions04  Auto  
+autoDeckContainerBase Property Potions05  Auto  
+autoDeckContainerBase Property Potions06  Auto  
+autoDeckContainerBase Property Potions07  Auto  
+autoDeckContainerBase Property Potions08  Auto  
+autoDeckContainerBase Property Potions09  Auto  
 
-autoDeckShelfContainerScript Property Ingots01  Auto  
-autoDeckShelfContainerScript Property Ingots02  Auto  
-autoDeckShelfContainerScript Property Ingots03  Auto  
-autoDeckShelfContainerScript Property Ingots04  Auto  
-autoDeckShelfContainerScript Property Ingots05  Auto  
-autoDeckShelfContainerScript Property Ingots06  Auto  
-autoDeckShelfContainerScript Property Ingots07  Auto  
-autoDeckShelfContainerScript Property Ingots08  Auto  
+autoDeckContainerBase Property Ingots01  Auto  
+autoDeckContainerBase Property Ingots02  Auto  
+autoDeckContainerBase Property Ingots03  Auto  
+autoDeckContainerBase Property Ingots04  Auto  
+autoDeckContainerBase Property Ingots05  Auto  
+autoDeckContainerBase Property Ingots06  Auto  
+autoDeckContainerBase Property Ingots07  Auto  
+autoDeckContainerBase Property Ingots08  Auto  
 
-autoDeckShelfContainerScript Property Books01  Auto  
-autoDeckShelfContainerScript Property Books02  Auto  
-autoDeckShelfContainerScript Property Books03  Auto  
+autoDeckContainerBase Property Books01  Auto  
+autoDeckContainerBase Property Books02  Auto  
+autoDeckContainerBase Property Books03  Auto  
 
-autoDeckShelfContainerScript Property Gems01  Auto  
-autoDeckShelfContainerScript Property Gems02  Auto  
+autoDeckContainerBase Property Gems01  Auto  
+autoDeckContainerBase Property Gems02  Auto  
 
-autoDeckShelfContainerScript Property SoulGems01  Auto  
-autoDeckShelfContainerScript Property SoulGems02  Auto  
+autoDeckContainerBase Property SoulGems01  Auto  
+autoDeckContainerBase Property SoulGems02  Auto  
 
-autoDeckShelfContainerScript Property Scrolls01  Auto  
-autoDeckShelfContainerScript Property Scrolls02  Auto  
+autoDeckContainerBase Property Scrolls01  Auto  
+autoDeckContainerBase Property Scrolls02  Auto  
 
-autoDeckShelfContainerScript Property Jewelry01  Auto  
-autoDeckShelfContainerScript Property Jewelry02  Auto  
+autoDeckContainerBase Property Jewelry01  Auto  
+autoDeckContainerBase Property Jewelry02  Auto  
 
-autoDeckShelfContainerScript Property Table01  Auto  
-autoDeckShelfContainerScript Property Table02  Auto  
+autoDeckContainerBase Property Table01  Auto  
+autoDeckContainerBase Property Table02  Auto  
 
 Keyword Property VendorItemPotion  Auto 
 Keyword Property VendorItemPoison  Auto 
@@ -56,77 +58,44 @@ Keyword Property VendorItemTool  Auto
 
 Event OnTriggerEnter(ObjectReference akActionRef)
 	if (akActionRef != Game.getPlayer())
-    ;debug.TraceAndBox("OnTriggerEnter, akActionRef: "+akActionRef)
-		if (isPotion(akActionRef))
-			if (Potions01 && !Potions01.isFull())
-				Potions01.AddItem(akActionRef, 1, true)
-      				Potions01.Activate(akActionRef)
-			elseif (Potions02 && !Potions02.isFull())
-				Potions02.AddItem(akActionRef, 1, true)
-      				Potions02.Activate(akActionRef)
-			elseif (Potions03 && !Potions03.isFull())
-				Potions03.AddItem(akActionRef, 1, true)
-      				Potions03.Activate(akActionRef)
-			elseif (Potions04 && !Potions04.isFull())
-				Potions04.AddItem(akActionRef, 1, true)
-      				Potions04.Activate(akActionRef)
-			elseif (Potions05 && !Potions05.isFull())
-				Potions05.AddItem(akActionRef, 1, true)
-      				Potions05.Activate(akActionRef)
-			elseif (Potions06 && !Potions06.isFull())
-				Potions06.AddItem(akActionRef, 1, true)
-      				Potions06.Activate(akActionRef)
-			elseif (Potions07 && !Potions07.isFull())
-				Potions07.AddItem(akActionRef, 1, true)
-      				Potions07.Activate(akActionRef)
-			elseif (Potions08 && !Potions08.isFull())
-				Potions08.AddItem(akActionRef, 1, true)
-      				Potions08.Activate(akActionRef)
-			elseif (Potions09)
-				Potions09.AddItem(akActionRef, 1, true)
-      				Potions09.Activate(akActionRef)
-			endif
-		elseif (isIngot(akActionRef))
+		;debug.TraceAndBox("Name: "+akActionRef.getBaseObject().getName()+", Type: "+akActionRef.getBaseObject().getType()+", Form ID: "+akActionRef.getBaseObject().getFormID())
+		if (isIngot(akActionRef))
 			if (Ingots01 && !Ingots01.isFull())
 				Ingots01.AddItem(akActionRef, 1, true)
-				Ingots01.Activate(akActionRef)
 			elseif (Ingots02 && !Ingots02.isFull())
 				Ingots02.AddItem(akActionRef, 1, true)
-				Ingots02.Activate(akActionRef)
+				;Ingots02.Activate(akActionRef)
 			elseif (Ingots03 && !Ingots03.isFull())
 				Ingots03.AddItem(akActionRef, 1, true)
-				Ingots03.Activate(akActionRef)
+				;Ingots03.Activate(akActionRef)
 			elseif (Ingots04 && !Ingots04.isFull())
 				Ingots04.AddItem(akActionRef, 1, true)
-				Ingots04.Activate(akActionRef)
+				;Ingots04.Activate(akActionRef)
 			elseif (Ingots05 && !Ingots05.isFull())
 				Ingots05.AddItem(akActionRef, 1, true)
-				Ingots05.Activate(akActionRef)
+				;Ingots05.Activate(akActionRef)
 			elseif (Ingots06 && !Ingots06.isFull())
 				Ingots06.AddItem(akActionRef, 1, true)
-				Ingots06.Activate(akActionRef)
+				;Ingots06.Activate(akActionRef)
 			elseif (Ingots07 && !Ingots07.isFull())
 				Ingots07.AddItem(akActionRef, 1, true)
-				Ingots07.Activate(akActionRef)
+				;Ingots07.Activate(akActionRef)
 			elseif (Ingots08)
 				Ingots08.AddItem(akActionRef, 1, true)
-				Ingots08.Activate(akActionRef)
+				;Ingots08.Activate(akActionRef)
 			endif
-		elseif (isBook(akActionRef))
-			if (Books01 && !Books01.isFull())
-				Books01.AddItem(akActionRef, 1, true)
-				Books01.Activate(akActionRef)
-			elseif (Books02 && !Books02.isFull())
-				Books02.AddItem(akActionRef, 1, true)
-				Books02.Activate(akActionRef)
-			elseif (Books03)
-				Books03.AddItem(akActionRef, 1, true)
-				Books03.Activate(akActionRef)
+		elseif (akActionRef.getBaseObject().getName() == "Skull")
+			if (Table02 )
+				Table02.AddItem(akActionRef, 1, true)
+				Table02.Activate(akActionRef)
 			endif
-		elseif(isSpellBook(akActionRef))
-			if (Books03)
-				Books03.AddItem(akActionRef,1,true)
-				Books03.Activate(akActionRef)
+		elseif (akActionRef.HasKeyword(VendorItemJewelry))
+			if (Jewelry01 && !Jewelry01.isFull())
+				Jewelry01.AddItem(akActionRef, 1, true)
+				Jewelry01.Activate(akActionRef)
+			elseif (Jewelry02 )
+				Jewelry02.AddItem(akActionRef, 1, true)
+				Jewelry02.Activate(akActionRef)
 			endif
 		elseif (isGem(akActionRef))
 			if (Gems01 && !Gems01.isFull())
@@ -152,30 +121,89 @@ Event OnTriggerEnter(ObjectReference akActionRef)
 				Scrolls02.AddItem(akActionRef, 1, true)
 				Scrolls02.Activate(akActionRef)
 			endif
-		elseif (akActionRef.HasKeyword(VendorItemJewelry))
-			if (Jewelry01 && !Jewelry01.isFull())
-				Jewelry01.AddItem(akActionRef, 1, true)
-				Jewelry01.Activate(akActionRef)
-			elseif (Jewelry02 )
-				Jewelry02.AddItem(akActionRef, 1, true)
-				Jewelry02.Activate(akActionRef)
+		elseif (isPotion(akActionRef))
+			if (Potions01 && !Potions01.isFull())
+				Potions01.AddItem(akActionRef, 1, true)
+			elseif (Potions02 && !Potions02.isFull())
+				Potions02.AddItem(akActionRef, 1, true)
+			elseif (Potions03 && !Potions03.isFull())
+				Potions03.AddItem(akActionRef, 1, true)
+			elseif (Potions04 && !Potions04.isFull())
+				Potions04.AddItem(akActionRef, 1, true)
+			elseif (Potions05 && !Potions05.isFull())
+				Potions05.AddItem(akActionRef, 1, true)
+			elseif (Potions06 && !Potions06.isFull())
+				Potions06.AddItem(akActionRef, 1, true)
+			elseif (Potions07 && !Potions07.isFull())
+				Potions07.AddItem(akActionRef, 1, true)
+			elseif (Potions08 && !Potions08.isFull())
+				Potions08.AddItem(akActionRef, 1, true)
+			elseif (Potions09)
+				Potions09.AddItem(akActionRef, 1, true)
 			endif
-	;	else 
-	;		if (Table01 && !Table01.isFull())
-		;		Table01.AddItem(akActionRef, 1, true)
-		;		Table01.Activate(akActionRef)
-		;	elseif (Table02 )
-		;		Table02.AddItem(akActionRef, 1, true)
-		;		Table02.Activate(akActionRef)
-		;	endif
+		elseif(isSpellBook(akActionRef))
+			if (Books03)
+				Books03.AddItem(akActionRef,1,true)
+				Books03.Activate(akActionRef)
+			endif
+		elseif (isBook(akActionRef))
+			if (Books01 && !Books01.isFull())
+				Books01.AddItem(akActionRef, 1, true)
+				Books01.Activate(akActionRef)
+			elseif (Books02 && !Books02.isFull())
+				Books02.AddItem(akActionRef, 1, true)
+				Books02.Activate(akActionRef)
+			elseif (Books03)
+				Books03.AddItem(akActionRef, 1, true)
+				Books03.Activate(akActionRef)
+			endif
+		else 
+			if (Table01 && !Table01.isFull())
+				Table01.AddItem(akActionRef, 1, true)
+				Table01.Activate(akActionRef)
+			endif
    
 		endif
 	endif
 EndEvent
  
+;Event OnTriggerLeave(ObjectReference akActionRef)
+	;if (akActionRef == Game.getPlayer())
+			;if (Potions01)
+      				;Potions01.Activate(akActionRef)
+			;endif
+			;if (Potions02)
+      				;Potions02.Activate(akActionRef)
+			;endif
+			;if (Potions03)
+      				;Potions03.Activate(akActionRef)
+			;endif
+			;if (Potions04)
+      				;Potions04.Activate(akActionRef)
+			;endif
+;			if (Potions05)
+;      				Potions05.Activate(akActionRef)
+;			endif
+;			if (Potions06)
+;      				Potions06.Activate(akActionRef)
+;			endif
+			;elseif (Potions07 && !Potions07.isFull())
+				;Potions07.AddItem(akActionRef, 1, true)
+      				;Potions07.Activate(akActionRef)
+			;elseif (Potions08 && !Potions08.isFull())
+				;Potions08.AddItem(akActionRef, 1, true)
+      				;Potions08.Activate(akActionRef)
+			;elseif (Potions09)
+				;Potions09.AddItem(akActionRef, 1, true)
+      				;Potions09.Activate(akActionRef)
+			;endif
+		
+	;endif
+;endEvent
+
 bool Function isBook(ObjectReference akActionRef)
 
-	if (akActionRef.HasKeyword(VendorItemBook) || akActionRef.HasKeyword(VendorItemSpellTome))
+	if (akActionRef.HasKeyword(VendorItemBook))
 		return true
 	else
 		return (akActionRef.GetBaseObject() as Book)
@@ -185,17 +213,17 @@ endFunction
 
 bool Function isSpellBook(ObjectReference akActionRef)
 
-	if (akActionRef.HasKeyword(VendorItemSpellTome))
+	if (akActionRef.GetBaseObject().HasKeyword(VendorItemSpellTome))
 		return true
-	;else
-		;return (akActionRef.GetBaseObject() as Book)
+	else
+		return false
 	endif
 	
 endFunction
 
 bool Function isIngot(ObjectReference akActionRef)
 
-	if (akActionRef.HasKeyword(VendorItemOreIngot))
+	if (akActionRef.GetBaseObject().HasKeyword(VendorItemOreIngot) || akActionRef.HasKeyword(VendorItemOreIngot))
 		return true
 	else
 		return false 
@@ -214,20 +242,20 @@ endFunction
 
 bool Function isGem(ObjectReference akActionRef)
 
-	if (akActionRef.HasKeyword(VendorItemGem))
+	if (akActionRef.GetBaseObject().HasKeyword(VendorItemGem))
 		return true
-	;else
-		;return (akActionRef.GetBaseObject() as Book)
+	else
+		return false;
 	endif
 	
 endFunction
 
 bool Function isSoulGem(ObjectReference akActionRef)
 
-	if (akActionRef.HasKeyword(VendorItemGem))
+	if (akActionRef.HasKeyword(VendorItemSoulGem))
 		return true
-	;else
-		;return (akActionRef.GetBaseObject() as Book)
+	else
+		return (akActionRef.GetBaseObject() as SoulGem)
 	endif
 	
 endFunction
@@ -236,8 +264,8 @@ bool Function isScroll(ObjectReference akActionRef)
 
 	if (akActionRef.GetBaseObject().HasKeyword(VendorItemScroll))
 		return true
-	;else
-		;return (akActionRef.GetBaseObject() as Book)
+	else
+		return (akActionRef.GetBaseObject() as Scroll)
 	endif
 	
 endFunction

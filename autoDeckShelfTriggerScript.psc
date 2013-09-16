@@ -1,5 +1,5 @@
 Scriptname autoDeckShelfTriggerScript extends ObjectReference  
-{Trigger script fot the Organizer shelf}
+{Trigger for autoDeck shelves which makes sure items get removed from the container if they fall off the shelf.}
 
 import debug
 import utility
@@ -39,8 +39,8 @@ auto STATE WaitForBooks
 				; Player isnt' grabbing this reference, check to see if it's in the container.
 				if Shelfcontainer.GetItemCount(TriggerRef.GetBaseObject()) >= 1
 					Shelfcontainer.RemoveItem(TriggerRef.GetBaseObject(), 1)
-					(Shelfcontainer as autoDeckShelfContainerScript).CurrentBookAmount = (Shelfcontainer as autoDeckShelfContainerScript).CurrentBookAmount - 1
-					(ShelfContainer as autoDeckShelfContainerScript).RemoveBooks((TriggerRef.GetBaseObject()), 1)
+					(Shelfcontainer as autoDeckContainerBase).CurrentBookAmount = (Shelfcontainer as autoDeckContainerBase).CurrentBookAmount - 1
+					(ShelfContainer as autoDeckContainerBase).RemoveBooks((TriggerRef.GetBaseObject()), 1)
 				else
 				; There is no book based on this form in the container
 					;Trace("DARYL - " + self + " Container doesn't contain this book")

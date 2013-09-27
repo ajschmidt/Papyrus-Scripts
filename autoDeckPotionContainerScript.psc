@@ -52,8 +52,8 @@ ObjectReference Property PotionShelfTrigger04Ref Auto Hidden
 Int Property MaxPotionsAllowed Auto Hidden
 {Max potions allowed on this partciular shelf}
 
-Int Property CurrentPotionAmount Auto Hidden
-{The current amount of potions placed on the shelf}
+;Int Property CurrentBookAmount Auto Hidden
+;{The current amount of potions placed on the shelf}
 
 Form Property EmptyForm Auto Hidden
 {Null Form}
@@ -186,14 +186,14 @@ endEVENT
 EVENT OnActivate(ObjectReference akActionRef)
 	; Removing all items from container as a precaution
 	Trace("POTIONS - I've been ACTIVATED!")
-	PotionShelfRoomLeftMESSAGE.Show((MaxPotionsAllowed - CurrentPotionAmount))
-	;debug.Notification("You can place " + (MaxPotionsAllowed - CurrentPotionAmount) + " more potions on this shelf.")
+	PotionShelfRoomLeftMESSAGE.Show((MaxPotionsAllowed - CurrentBookAmount))
+	;debug.Notification("You can place " + (MaxPotionsAllowed - CurrentBookAmount) + " more potions on this shelf.")
 
 	if (PotionShelfGlobal.GetValue() == 0)
 		PotionShelfFirstActivateMESSAGE.Show()
 		PotionShelfGlobal.SetValue(1)
 	endif
-	;CurrentPotionAmount = 0
+	;CurrentBookAmount = 0
 
 	if PotionShelfTrigger01Ref
 		PotionShelfTrigger01Ref.GoToState("IgnorePotions")
@@ -236,7 +236,7 @@ Event OnItemRemoved(Form akBaseItem, int aiItemCount, ObjectReference akItemRefe
 		if BlockPotions == FALSE
 			; If the item is a potion find the corresponding potion reference and remove it.
 			Trace("POTIONS - Form being Removed " + akBaseItem + " is a Potion! Removing "+aiItemCount+" from the list")
-			CurrentPotionAmount = CurrentPotionAmount - aiItemCount
+			CurrentBookAmount = CurrentBookAmount - aiItemCount
 			RemovePotions(akBaseItem, aiItemCount)
 		else
 			BlockPotions = FALSE
@@ -248,19 +248,19 @@ event OnItemAdded(Form akBaseItem, int aiItemCount, ObjectReference akItemRefere
 	Trace("PotionRack - Adding " + akBaseItem + " to the Potion Container from : "+ akSourceContainer)
 	
 	; If the item being added is a potion then check to see if there is room in on the shelf.
-	if ((aiItemCount + CurrentPotionAmount) <= MaxPotionsAllowed)
+	if ((aiItemCount + CurrentBookAmount) <= MaxPotionsAllowed)
 		; There's room on teh shelf, manage the potion placement
-		CurrentPotionAmount = CurrentPotionAmount + aiItemCount
-		Trace("PotionRack - " + CurrentPotionAmount + "/" + MaxPotionsAllowed + " There is room for another potion, lets place it on the shelf.")
+		CurrentBookAmount = CurrentBookAmount + aiItemCount
+		Trace("PotionRack - " + CurrentBookAmount + "/" + MaxPotionsAllowed + " There is room for another potion, lets place it on the shelf.")
 		if ( !akSourceContainer )
 			AddPotionRef(akItemReference, aiItemCount)
 		else
 			AddPotions(akBaseItem, aiItemCount)
 		endif
 	else
-		CurrentPotionAmount = CurrentPotionAmount + aiItemCount
+		CurrentBookAmount = CurrentBookAmount + aiItemCount
 		; There is no room on the shelf.  Tell the player this and give him his potion back.
-		Trace("PotionRack - " + CurrentPotionAmount + "/" + MaxPotionsAllowed + " There's no more room for potions on this shelf.")
+		Trace("PotionRack - " + CurrentBookAmount + "/" + MaxPotionsAllowed + " There's no more room for potions on this shelf.")
 
 		if (akSourceContainer)
 			utility.waitMenuMode(0)
@@ -709,7 +709,7 @@ function AddPotionRef(ObjectReference PotionRef, Int PotionAmount)
 		        PlacedPotion18Ref.BlockActivation()
 			PotionAmount = PotionAmount - 1
 		endif
-		;CurrentPotionAmount = CurrentPotionAmount + 1
+		;CurrentBookAmount = CurrentBookAmount + 1
 	endWhile
 endFunction
 
@@ -838,7 +838,7 @@ function CountMaxPotions()
 endFunction
 
 bool function isFull()
-	if (CurrentPotionAmount < MaxPotionsAllowed)
+	if (CurrentBookAmount < MaxPotionsAllowed)
 		return false
 	else
 		return true

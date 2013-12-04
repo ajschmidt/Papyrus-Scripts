@@ -68,10 +68,14 @@ ObjectReference Property PlacedBook15Ref Auto Hidden
 ObjectReference Property PlacedBook17Ref Auto Hidden
 ObjectReference Property PlacedBook16Ref Auto Hidden
 ObjectReference Property PlacedBook18Ref Auto Hidden
+ObjectReference Property BookMarkerLate Auto Hidden
+ObjectReference Property OverflowContainer = None Auto Hidden
 {List of Placed Book Refs}
 
 Bool Property adAlreadyLoaded2 = FALSE Auto Hidden
 Bool Property adAlreadyLoaded8 = FALSE Auto Hidden
+Bool Property containerFull = FALSE Auto Hidden 
+Bool shelfFull = FALSE 
 
 float minSize = 1.2
 float space = 0.3
@@ -83,8 +87,11 @@ int NumBooks = 0
 ;Distance from first to last book
 float TotalDistance = 0.0
 
+;Amount of space already occupied on the shelf
+float UsedSpace = 0.0
+
 ;Fraction of total distance covered so far
-float BookOffset = 0.0
+float TotalOffset = 0.0
 float xDist = 0.0
 float yDist = 0.0
 float zDist = 0.0
@@ -101,19 +108,23 @@ float[] ingotR2
 float[] ingotR3
 float[] ingotR4
 int stackedIngots
+int AddCount = 0
 
-EVENT OnCellLoad()
+event OnCellLoad()
         load()
-endEVENT
+endEvent
 
-
-EVENT OnActivate(ObjectReference akActionRef)
-	BlockActivate()
-	self.BlockActivation(true)
+event OnActivate(ObjectReference akActionRef)
 	if (BookShelfGlobal.GetValue() == 0)
 		BookShelfFirstActivateMESSAGE.Show()
 		BookShelfGlobal.SetValue(1)
 	endif
+	refresh(akActionRef)
+endEvent
+
+function refresh(ObjectReference akActionRef)
+	BlockActivate()
+	self.BlockActivation(true)
 
 	if BookShelfTrigger01Ref
 		BookShelfTrigger01Ref.GoToState("IgnoreBooks")
@@ -130,6 +141,8 @@ EVENT OnActivate(ObjectReference akActionRef)
 
 	Wait(0.25)
 	; The following will fire when the player leaves inventory
+	BookMarkerStart = GetLinkedRef(BookShelfBook01)
+	BookMarkerLate = BookMarkerStart.PlaceAtMe(BookMarkerStart.GetBaseObject())
 	UpdateBooks()
 
 	if BookShelfTrigger01Ref
@@ -146,40 +159,127 @@ EVENT OnActivate(ObjectReference akActionRef)
 	endif
 	self.blockActivation(false)
 	CurrentBookAmount = NumBooks
-endEVENT
+endFunction
 
+function UpdateBooks()
+	GoToState("PlacingBooks") ; Future calls should not mess with this stuff
+	ingotR1 = new float[128]
+	ingotR2 = new float[128]
+	ingotR3 = new float[128]
+	ingotR4 = new float[128]
+	stackedIngots = 0
+	;Start updating book locations
+	int i=0
+        ;Debug.TraceAndBox("UpdateBooks "+self+", NumBooks: "+NumBooks+", shelfFull: "+shelfFull+", UsedSpace: "+UsedSpace+", TotalDistance: "+TotalDistance)
+	while i<NumBooks
+		if self.getItemCount(PlacedBooks[i]) == 0
+			debug.TraceAndBox("Alert: Book '"+PlacedBooks[i].getName()+"' not found in the containers inventory. It must have been removed.")
+			PlacedBooksRef[i] = PlacedBooksRef[NumBooks - 1]
+			PlacedBooks[i] = PlacedBooks[NumBooks - 1]
+			if i==NumBooks - 1
+				PlacedBooks[i] = None
+			endif
+			NumBooks -= 1
+		endif
+		PlacedBooksRef[i].Disable()
+		PlacedBooksRef[i].Delete()
+		PlacedBooksRef[i]=UpdateSingleBook(PlacedBooks[i], i)
+		i+=1
+	endwhile
+	
+	;Delete the rest of the references
+	while i<PlacedBooks.length
+		if PlacedBooksRef[i]
+			PlacedBooksRef[i].Disable()
+			PlacedBooksRef[i].Delete()
+			PlacedBooksRef[i] = None
+        ;Debug.TraceAndBox("UpdateBooks, disable: "+i)
+		endIf
+		i+=1
+	endwhile
+	GoToState("") ; Now allow books to be updated again
+	
+	;Enable newly placed books
+	i=0
+	while i<NumBooks
+		if(PlacedBooks[i])
+			PlacedBooksRef[i].enable()
+			PlacedBooksRef[i].BlockActivation(FALSE)
+			PlacedBooksRef[i].SetMotionType(1)
+        ;Debug.TraceAndBox("UpdateBooks, enable: "+i)
+		else
+			CleanArrays()
+		endif
+		i+=1
+	endwhile
+	CurrentBookAmount = NumBooks
+endFunction
 
 Event OnItemRemoved(Form akBaseItem, int aiItemCount, ObjectReference akItemReference, ObjectReference akDestContainer)
-	;if (akBaseItem as Book || akBaseItem as Scroll)
-		if BlockBooks == FALSE
-			; If the item is a book find the corresponding book reference and remove it.
-			;MessageBox("BOOKCASE - Form being Removed " + akBaseItem + " is a Book! Remove it from the list")
-			RemoveBooks(akBaseItem, aiItemCount)
-		else
-			BlockBooks = FALSE
+	if BlockBooks == FALSE
+		; If the item is a book find the corresponding book reference and remove it.
+		;MessageBox("BOOKCASE - Form being Removed " + akBaseItem + " is a Book! Remove it from the list")
+		
+		int orient = orientation(akItemReference)
+		float itemWidth = getBookAmount(akItemReference, orient)
+
+		if akItemReference.hasKeyword(VendorItemOreIngot)
+			itemWidth = 2 * itemWidth/3
 		endif
-	;endif
+
+		UsedSpace -= (itemWidth * aiItemCount)
+		shelfFull = FALSE
+        ;Debug.TraceAndBox("OnItemRemoved "+self+", NumBooks: "+NumBooks+", shelfFull: "+shelfFull+", UsedSpace: "+UsedSpace+", TotalDistance: "+TotalDistance+"Book Name: "+akItemReference.getName())
+		RemoveBooks(akBaseItem, aiItemCount)
+	else
+		BlockBooks = FALSE
+	endif
 	CurrentBookAmount = NumBooks
         
 endEvent
 
 
 Event OnItemAdded(Form akBaseItem, int aiItemCount, ObjectReference akItemReference, ObjectReference akSourceContainer)
-	; Check to see if there is room in on the shelf.
-	if ((aiItemCount + NumBooks) <= MaxBooks)
-		; There's room on teh shelf, manage the book placement
-		AddBooks(akBaseItem, aiItemCount)
+	itemAdded(akBaseItem, aiItemCount, akItemReference, akSourceContainer)
+endEvent
+
+function itemAdded(Form akBaseItem, int aiItemCount, ObjectReference akItemReference, ObjectReference akSourceContainer)
+	self.BlockActivation(true)
+	int aiItemDiff = 0
+
+	;while GetState() == "PlacingBooks"
+		;Wait(0.25)
+	;endWhile
+
+	; Check to see if there is room in the container.
+	if ((aiItemCount + NumBooks) > MaxBooks)
+		containerFull = TRUE
+		aiItemDiff = (aiItemCount + NumBooks) - MaxBooks		
+		aiItemCount = aiItemCount - aiItemDiff
+	endif
+
+	; Add any items that will fit
+	if !akSourceContainer
+		AddBooks(akItemReference, akBaseItem, aiItemCount)
+		;refresh(akItemReference)
 	else
-		; There is no room on the shelf.  Tell the player this and give him his book back.
+		AddBooks(akItemReference, akBaseItem, aiItemCount)
+	endif
+
+	if containerFull
+	debug.TraceAndBox("Container Full MaxBooks="+MaxBooks)
+		; Remove the items that won't fit in the container
 		utility.waitMenuMode(0)
 		BookShelfNoMoreRoomMESSAGE.Show()
 		BlockBooks = TRUE
-		self.RemoveItem(akBaseItem, aiItemCount, true, Game.GetPlayer())
+		self.RemoveItem(akBaseItem, aiItemDiff, true, OverflowContainer)
 	endif
-	CurrentBookAmount = NumBooks
-endEvent
 
-Function load()
+	CurrentBookAmount = NumBooks
+	self.BlockActivation(false)
+endFunction
+
+function load()
 	if adAlreadyLoaded2 == FALSE
 		;MessageBox("BOOKCASE - Running OnLoad()")
 		PlacedBooks = new Form[128]
@@ -220,6 +320,7 @@ Function load()
 	self.blockActivation(false)
 	CleanArrays()
 	adAlreadyLoaded = false
+	AddCount = 0
 endFunction
 
 Function BlockActivate()
@@ -234,7 +335,7 @@ endFunction
 
 Function RemoveBooks(Form BookBase, Int BookAmount)
 	;Debug.TraceAndBox("autoDeckShelfContainer.RemoveBooks()")
-	if GetState() != "PlacingBooks"
+	;if GetState() != "PlacingBooks"
 		int tempEnd = NumBooks
 		While BookAmount > 0
 			int i=0
@@ -255,7 +356,7 @@ Function RemoveBooks(Form BookBase, Int BookAmount)
 			endwhile
 			BookAmount -= 1
 		endWhile
-	endif
+	;endif
 	CurrentBookAmount = NumBooks
 endFunction
 
@@ -263,13 +364,14 @@ float Function getBookAmount(ObjectReference BookRef, int orient = 0)
 	if !BookRef
 		return 0
 	endif
+        ;Debug.TraceAndBox("getBookAmount, orient="+orient+" , length: "+BookRef.getLength()+", width: "+BookRef.getWidth()+", height: "+BookRef.getHeight())
 	float dim = 0
 	if orient == 0
-		dim = BookRef.getHeight()
+		dim = BookRef.getHeight() + 1 
         ;Debug.TraceAndBox("getBookAmount, orient=0, obj: "+BookRef.getBaseObject()+", dim: "+dim)
 	elseif orient == 1
 		dim = BookRef.getLength() + 3
-        ;Debug.TraceAndBox("getBookAmount, orient=1, obj: "+BookRef.getBaseObject()+", dim: "+dim)
+        ;Debug.TraceAndBox("getBookAmount, orient=1, length: "+BookRef.getLength()+", width: "+BookRef.getWidth()+", height: "+BookRef.getHeight())
 	else
 		dim = BookRef.getWidth() + 3
         ;Debug.TraceAndBox("getBookAmount, orient=2, obj: "+BookRef.getBaseObject()+", dim: "+dim)
@@ -286,22 +388,108 @@ float Function getBookAmount(ObjectReference BookRef, int orient = 0)
 	return dim
 endFunction
 
-Function AddBooks(Form BookBase, Int BookAmount)
+float function getDefaultWidth(Form itemType)
+	float retWidth = 6.0
+
+	if itemType as Book
+		retWidth = 3.5
+	elseif itemType as Potion
+		retWidth = 8.0
+	endif
+
+	return retWidth
+
+endFunction
+
+function AddBooks(ObjectReference item, Form BookBase, Int BookAmount)
         ;Debug.TraceAndBox("AddBooks, NumBooks: "+NumBooks)
-	While BookAmount > 0
-		if NumBooks < MaxBooks
+
+	while BookAmount > 0
+		if thereIsRoom(item, BookBase)
 			PlacedBooks[NumBooks] = BookBase
 			NumBooks += 1
         ;Debug.TraceAndBox("AddBooks while, NumBooks: "+NumBooks)
+		else
+        ;Debug.TraceAndBox("RemoveItem "+self+", NumBooks: "+NumBooks+", shelfFull: "+shelfFull+", UsedSpace: "+UsedSpace+", TotalDistance: "+TotalDistance+"Book Name: "+item.getName())
+			BlockBooks = true
+			self.RemoveItem(BookBase, 1, true, OverflowContainer)
 		endif
 		BookAmount -= 1
 	endWhile
 	CurrentBookAmount = NumBooks
 endFunction
 
+;bool function addToContainer(ObjectReference item)
+	;Form BookBase = item.GetBaseObject()
+
+	;while GetState() == "AddingBooks"
+		;Wait(0.25)
+	;endWhile
+
+	;GoToState("AddingBooks") ; Future calls should not mess with this stuff
+	;AddCount += 1
+	;debug.TraceAndBox("addToContainer, AddCount = "+AddCount)
+
+	;if thereIsRoom(item)
+		;PlacedBooks[NumBooks] = BookBase
+		;NumBooks += 1
+		;CurrentBookAmount = NumBooks
+		;AddItem(item,1,true)
+		;GoToState("") ; Future calls should not mess with this stuff
+		;return true
+	;else
+		;OverflowContainer.AddItem(item,1,true)
+		;GoToState("") ; Future calls should not mess with this stuff
+		;return false
+	;endif
+;endFunction
+
+bool function thereIsRoom(ObjectReference item, Form itemType)
+	if self.isFull()
+		return FALSE
+	endif
+
+	float itemWidth = 0.0
+
+	if item 
+		int orient = orientation(item)
+		itemWidth = getBookAmount(item, orient)
+
+		if item.hasKeyword(VendorItemOreIngot)
+			itemWidth = 2 * itemWidth/3
+		endif
+	else
+		itemWidth = getDefaultWidth(itemType)
+	endif
+		
+
+	; Calculate Available Space
+	int i = 0
+        float slack = TotalDistance - UsedSpace
+	;debug.TraceAndBox("slack="+slack+", UsedSpace="+UsedSpace+", itemWidth="+itemWidth+", TotalDistance="+TotalDistance)
+
+	if slack > itemWidth
+		;if (slack - itemWidth) < 19.0
+			;shelfFull = TRUE
+		;else 
+			;shelfFull = FALSE
+		;endif
+			
+		UsedSpace += itemWidth 
+		return TRUE
+	else
+		if slack < 19.0
+			shelfFull = TRUE
+		else 
+			shelfFull = FALSE
+		endif
+
+		return FALSE
+	endif
+		
+endFunction
 
 Function CountMaxBooks()
-	;BookMarkerEnd = BookMarkerStart
         ;Debug.TraceAndBox("CountMaxBooks2, BookMarkerEnd: "+BookMarkerEnd+", BookMarkerStart: "+BookMarkerStart)
 	; Checks how many books can be placed on this shelf
 	if GetLinkedRef(BookShelfBook18) 
@@ -351,85 +539,120 @@ Function CountMaxBooks()
 endFunction
 
 
-ObjectReference Function UpdateSingleBook(Form TargetBook, Int index)
-   ObjectReference retVal
-  ;Debug.TraceAndBox("UpdateSingleBook, TargetBook: "+TargetBook)
-   if TargetBook
-	retVal = BookMarkerEnd.PlaceAtMe(TargetBook)
+ObjectReference function UpdateSingleBook(Form itemType, Int index)
+	if itemType
+		if (itemType as Book)
+			return positionBook(itemType, index)
+		else
+			return updateOther(itemType, index)
+		endif
+	endif
+
+	ObjectReference retVal
+	return retVal
+endFunction
+
+int function orientation(ObjectReference item)
+	int orient = 0
+	if item.GetBaseObject() as Book
+		orient = 0
+	elseif ((item.getLength() * 2) < item.getWidth()) || (item.getLength() > (MarkerLength * 1.8))
+		orient = 1
+	else
+		orient = 2
+	endif
+		
+	return orient
+endFunction
+
+ObjectReference function updateOther(Form itemType, int index)
+	ObjectReference retVal
+	retVal = BookMarkerStart.PlaceAtMe(itemType)
 	retVal.BlockActivation()
-  ;Debug.TraceAndBox("UpdateSingleBook, PlaceAtMe.TargetBook: "+BookMarkerStart.GetPositionX()+","+BookMarkerStart.GetPositionY()+","+BookMarkerStart.GetPositionZ())
-  ;Debug.TraceAndBox("UpdateSingleBook, retVal 1: x="+retVal.GetPositionX()+", y="+retVal.GetPositionY()+", z="+retVal.GetPositionZ())
+	float orientAngle = 0.0
+	int orient = orientation(retVal)
+	if orient == 1
+		orientAngle += 90.0
+	endif
+	float bookAmt = getBookAmount(retVal, orient)
+
+	if (itemType as autoDeckUBRotateItem)
+		;Debug.TraceAndBox("updateOther, UBRotate: "+orientAngle)
+		orientAngle += 180.0
+	endif
 		
-      float orientAngle = 0.0
-      int orient
-      if (retVal.getLength() < retVal.getWidth()) || (retVal.getLength() > (MarkerLength * 1.1))
-         orient = 1
-         orientAngle += 90.0
-      else
-         orient = 2
-      endif
-      if (TargetBook as autoDeckUBRotateItem)
-         ;Debug.TraceAndBox("UpdateSingleBook, UBRotate: "+orientAngle)
-         orientAngle += 180.0
-      endif
-		
-      float bookAmt = getBookAmount(retVal, orient)
-      if index == 0
-         BookOffset += (bookAmt - MarkerHeight)/(TotalDistance*2)
-      endif
+	if index == 0
+		TotalOffset = (bookAmt - MarkerHeight)/(TotalDistance*2)
+	endif
 
 	if VerticalBooks
-		if TargetBook.hasKeyword(VendorItemOreIngot)
+		if itemType.hasKeyword(VendorItemOreIngot)
 			retVal = positionIngot(retVal, index, orient, orientAngle)
 		elseif  retVal.getHeight() > 0
 			retVal = positionOther(retVal, orient, orientAngle)
 		endif
 	endif
 
-        ;Debug.TraceAndBox("UpdateSingleBook p2, retVal: x="+retVal.GetPositionX()+", y="+retVal.GetPositionY()+", z="+retVal.GetPositionZ())
-        ;Debug.TraceAndBox("UpdateSingleBook p2, BookMarkerStart: x="+BookMarkerStart.GetPositionX()+", y="+BookMarkerStart.GetPositionY()+", z="+BookMarkerStart.GetPositionZ())
-		
-		if (BookOffset + bookAmt/TotalDistance) > (1.0 + (1.5 * MarkerHeight/TotalDistance))
-			retVal.disable()
-			retVal.delete()
-			while NumBooks>index
-				self.RemoveItem(PlacedBooks[ NumBooks - 1 ], 1, true, Game.GetPlayer())
-				PlacedBooks[ NumBooks - 1 ]=None
-				NumBooks -= 1
-			endwhile
-			Notification("Some items did not fit and have been given back")
-			return None
-		endif
-		
-		BookOffset+=bookAmt/TotalDistance
-	endIf
-	return retVal
-EndFunction
-
-ObjectReference Function positionBook(ObjectReference retVal, int orient, float orientAngle)
-	float dx=xDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance)) ;-(MarkerHeight/2.0)
-	float dy=yDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance))
-	float dz=zDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance))
-	dz += (retVal.getWidth() - MarkerWidth)/2.0
-
-	if orient == 0 
-		retVal.moveTo(BookMarkerStart,dx,dy,dz)
+	if (TotalOffset + bookAmt/TotalDistance) > (1.0 + (1.5 * MarkerHeight/TotalDistance))
+		shelfFull = TRUE
+		retVal.disable()
+		retVal.delete()
+		;while NumBooks>index
+			;self.RemoveItem(PlacedBooks[ NumBooks - 1 ], 1, true, OverflowContainer)
+			;;self.RemoveItem(PlacedBooks[ NumBooks - 1 ], 1, true, Game.GetPlayer())
+			;PlacedBooks[ NumBooks - 1 ]=None
+			;NumBooks -= 1
+		;endwhile
+		Notification("Some items did not fit and have been given back")
+		return None
 	else
-		retVal.setAngle(0, 0, (MarkerAngle - 90.0)*OrientMult + orientAngle)
-		retVal.moveTo(BookMarkerStart,dx,dy,dz, false)
+		shelfFull = FALSE
 	endif
-
-	return retVal
 		
-EndFunction
+	TotalOffset += bookAmt/TotalDistance
+	return retVal
+endFunction
 
-ObjectReference Function positionOther(ObjectReference retVal, int orient, float orientAngle)
-	float dx=xDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance)) ;-(MarkerHeight/2.0)
-	float dy=yDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance))
-	float dz=zDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance))
+ObjectReference function positionBook(Form bookType, int index)
+	float bookAmt = 0.0
+	if index == 0
+		TotalOffset = (2)/(TotalDistance*2)
+	endif
+	float dx=xDist*(TotalOffset )
+	float dy=yDist*(TotalOffset )
+	float dz=zDist*(TotalOffset )
+	BookMarkerLate.moveTo(BookMarkerStart,dx,dy,dz,false)
+	ObjectReference retVal = BookMarkerLate.PlaceAtMe(bookType, 1)
+	retVal.SetMotionType(4)
+	bookAmt = retVal.getHeight() + 1.0
+
+	if (TotalOffset + bookAmt/TotalDistance) > (1.0 + (1.5 * MarkerHeight/TotalDistance))
+		retVal.disable()
+		retVal.delete()
+		while NumBooks>index
+			self.RemoveItem(PlacedBooks[ NumBooks - 1 ], 1, true, OverflowContainer)
+			;self.RemoveItem(PlacedBooks[ NumBooks - 1 ], 1, true, Game.GetPlayer())
+			PlacedBooks[ NumBooks - 1 ] = None
+			NumBooks -= 1
+		endwhile
+		;Notification("Some items did not fit and have been given back")
+		shelfFull = TRUE
+		return None
+	else
+		shelfFull = FALSE
+	endif
+		
+	TotalOffset += bookAmt/TotalDistance
+	return retVal
+endFunction
+
+ObjectReference function positionOther(ObjectReference retVal, int orient, float orientAngle)
+	float dx=xDist*(TotalOffset );- (0.4 * MarkerHeight/TotalDistance)) ;-(MarkerHeight/2.0)
+	float dy=yDist*(TotalOffset );- (0.4 * MarkerHeight/TotalDistance))
+	float dz=zDist*(TotalOffset );- (0.4 * MarkerHeight/TotalDistance))
 	;dz += (retVal.getHeight() - MarkerWidth)/2.0 
-	dz -=  14.0
-		;Debug.TraceAndBox("UpdateSingleBook adjust dz, dx: "+dx+", dy: "+dy+", dz: "+dz)
+	dz -= MarkerWidth/2.0 - 3
+	retVal.SetMotionType(4)
 
 	if orient == 0 
 		retVal.moveTo(BookMarkerStart,dx,dy,dz)
@@ -438,19 +661,21 @@ ObjectReference Function positionOther(ObjectReference retVal, int orient, float
 		retVal.moveTo(BookMarkerStart,dx,dy,dz, false)
 	endif
 
+	BookMarkerLate.moveTo(BookMarkerStart,dx,dy,dz,false)
 	return retVal
 		
-EndFunction
+endFunction
 
-ObjectReference Function positionIngot(ObjectReference retVal, int index, int orient, float orientAngle)
-	float dx=xDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance)) ;-(MarkerHeight/2.0)
-	float dy=yDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance))
-	float dz=zDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance))
+ObjectReference function positionIngot(ObjectReference retVal, int index, int orient, float orientAngle)
+	float dx=xDist*(TotalOffset );- (0.4 * MarkerHeight/TotalDistance)) ;-(MarkerHeight/2.0)
+	float dy=yDist*(TotalOffset );- (0.4 * MarkerHeight/TotalDistance))
+	float dz=zDist*(TotalOffset );- (0.4 * MarkerHeight/TotalDistance))
+	dz -= MarkerWidth/2.0 - 5 
 	int i=0
 	bool b=false
 	while !b && i<ingotR4.length - 3
 		if ingotR4[i]==0 && ingotR3[i]>0 && ingotR3[i+1]>0
-			dz += retVal.getHeight() * 3.3
+			dz += (retVal.getHeight() * 3.3) ;+ 2
 			dx = xDist*(ingotR3[i] + ingotR3[i+1])/2.0
 			dy = yDist*(ingotR3[i] + ingotR3[i+1])/2.0
 			ingotR4[i]=(ingotR3[i] + ingotR3[i+1])/2.0
@@ -461,7 +686,7 @@ ObjectReference Function positionIngot(ObjectReference retVal, int index, int or
 	i=0
 	while !b && i<ingotR3.length - 2
 		if ingotR3[i]==0 && ingotR2[i]>0 && ingotR2[i+1]>0
-			dz += retVal.getHeight() * 2.2
+			dz += (retVal.getHeight() * 2.2) ;+ 1
 			dx = xDist*(ingotR2[i] + ingotR2[i+1])/2.0
 			dy = yDist*(ingotR2[i] + ingotR2[i+1])/2.0
 			ingotR3[i]=(ingotR2[i] + ingotR2[i+1])/2.0
@@ -481,100 +706,28 @@ ObjectReference Function positionIngot(ObjectReference retVal, int index, int or
 		i+=1
 	endwhile
 	if !b
-		ingotR1[index - stackedIngots]=bookOffset
+		ingotR1[index - stackedIngots]=TotalOffset
 	else
 		float bookAmt = getBookAmount(retVal, orient)
-		BookOffset-=bookAmt/TotalDistance
+		TotalOffset-=bookAmt/TotalDistance
 		stackedIngots += 1
 	endif
 
+	retVal.SetMotionType(4)
 	if orient == 0 
 		retVal.moveTo(BookMarkerStart,dx,dy,dz)
-        ;Debug.TraceAndBox("UpdateSingleBook moveTo, BookMarkerStart: "+BookMarkerStart+", dx: "+dx+", dy: "+dy+", dz: "+dz)
+        ;Debug.TraceAndBox("positionIngot moveTo, BookMarkerStart: "+BookMarkerStart+", dx: "+dx+", dy: "+dy+", dz: "+dz)
 	else
 		retVal.setAngle(0, 0, (MarkerAngle - 90.0)*OrientMult + orientAngle)
-        ;Debug.TraceAndBox("UpdateSingleBook setAngle, Angle: "+((MarkerAngle - 90.0)*OrientMult + orientAngle))
+        ;Debug.TraceAndBox("positionIngot setAngle, Angle: "+((MarkerAngle - 90.0)*OrientMult + orientAngle))
 		retVal.moveTo(BookMarkerStart,dx,dy,dz, false)
-        ;Debug.TraceAndBox("UpdateSingleBook moveTo, BookMarkerStart: "+BookMarkerStart+", dx: "+dx+", dy: "+dy+", dz: "+dz)
+        ;Debug.TraceAndBox("positionIngot moveTo, BookMarkerStart: "+BookMarkerStart+", dx: "+dx+", dy: "+dy+", dz: "+dz)
 	endif
+	BookMarkerLate.moveTo(BookMarkerStart,dx,dy,dz,false)
 	return retVal
-EndFunction
+endFunction
 
-
-ObjectReference Function positionBottle(ObjectReference retVal, int orient)
-	float dx=xDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance)) ;-(MarkerHeight/2.0)
-	float dy=yDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance))
-	float dz=zDist*(BookOffset );- (0.4 * MarkerHeight/TotalDistance))
-
-	if retVal.getHeight() > 0
-		dz += (retVal.getHeight() - MarkerWidth)/2.0 ;
- 	endif
-	if orient == 0
-		retVal.moveTo(BookMarkerStart,dx,dy,dz)
-        ;Debug.TraceAndBox("positionBottle moveTo, BookMarkerStart: "+BookMarkerStart+", dx: "+dx+", dy: "+dy+", dz: "+dz)
-	else
-		retVal.setAngle(0, 0, (MarkerAngle - 90.0)*OrientMult)
-        ;Debug.TraceAndBox("UpdateSingleBook setAngle, Angle: "+((MarkerAngle - 90.0)*OrientMult))
-		retVal.moveTo(BookMarkerStart,dx,dy,dz, false)
-        ;Debug.TraceAndBox("positionBottle moveTo, BookMarkerStart: "+BookMarkerStart+", dx: "+dx+", dy: "+dy+", dz: "+dz)
-	endif
-	return retVal
-EndFunction
-
-Function UpdateBooks()
-	GoToState("PlacingBooks") ; Future calls should not mess with this stuff
-	ingotR1 = new float[128]
-	ingotR2 = new float[128]
-	ingotR3 = new float[128]
-	ingotR4 = new float[128]
-	stackedIngots = 0
-	;Start updating book locations
-	BookOffset=0
-	int i=0
-        ;Debug.TraceAndBox("UpdateBooks, NumBooks: "+NumBooks)
-	while i<NumBooks
-		if self.getItemCount(PlacedBooks[i]) == 0
-			PlacedBooksRef[i] = PlacedBooksRef[NumBooks - 1]
-			PlacedBooks[i] = PlacedBooks[NumBooks - 1]
-			if i==NumBooks - 1
-				PlacedBooks[i] = None
-			endif
-			NumBooks -= 1
-		endif
-		PlacedBooksRef[i].Disable()
-		PlacedBooksRef[i].Delete()
-		PlacedBooksRef[i]=UpdateSingleBook(PlacedBooks[i], i)
-		i+=1
-	endwhile
-	
-	;Delete the rest of the references
-	while i<PlacedBooks.length
-		if PlacedBooksRef[i]
-			PlacedBooksRef[i].Disable()
-			PlacedBooksRef[i].Delete()
-			PlacedBooksRef[i] = None
-        ;Debug.TraceAndBox("UpdateBooks, disable: "+i)
-		endIf
-		i+=1
-	endwhile
-	GoToState("") ; Now allow books to be updated again
-	
-	;Enable newly placed books
-	i=0
-	while i<NumBooks
-		if(PlacedBooks[i])
-			PlacedBooksRef[i].enable()
-			PlacedBooksRef[i].BlockActivation(FALSE)
-        ;Debug.TraceAndBox("UpdateBooks, enable: "+i)
-		else
-			CleanArrays()
-		endif
-		i+=1
-	endwhile
-	CurrentBookAmount = NumBooks
-EndFunction
-
-Function CleanArrays()
+function CleanArrays()
 	;Update arrays if the max number of books is changed
 	if MaxBooks != PlacedBooks.length
 		Form[] tmp = new Form[128]
@@ -607,9 +760,9 @@ Function CleanArrays()
 		i += 1
 	endwhile
 	NumBooks = loc
-EndFunction
+endFunction
 
-Function RecoverOldBooks()
+function RecoverOldBooks()
 	PlacedBooks[0] = PlacedBook01
 	PlacedBooksRef[0] = PlacedBook01Ref
 	PlacedBook01 = None
@@ -682,18 +835,21 @@ Function RecoverOldBooks()
 	PlacedBooksRef[17] = PlacedBook18Ref
 	PlacedBook18 = None
 	PlacedBook18Ref = None
-EndFunction
+endFunction
 
-bool Function isFull()
-	return (NumBooks >= MaxBooks)
-EndFunction
+bool function isFull()
+	return shelfFull || containerFull
+endFunction
 
-State PlacingBooks
-	Function UpdateBooks()
+state AddingBooks
+endState 
+
+state PlacingBooks
+	function UpdateBooks()
 		; Already updating books, so ignore
-	EndFunction
+	endFunction
 	
 	EVENT OnActivate(ObjectReference akActionRef)
 	EndEvent
-EndState 
+endState 
 

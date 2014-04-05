@@ -19,6 +19,7 @@ ObjectReference Property BookShelfTrigger04Ref Auto Hidden
 
 ObjectReference Property BookMarkerStart Auto Hidden 
 ObjectReference Property BookMarkerEnd Auto Hidden 
+ObjectReference Property OverflowContainer = None Auto Hidden
 
 Form[] Property PlacedBooks Auto Hidden
 {List of Placed Book Forms}

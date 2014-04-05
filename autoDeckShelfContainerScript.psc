@@ -69,7 +69,6 @@ ObjectReference Property PlacedBook17Ref Auto Hidden
 ObjectReference Property PlacedBook16Ref Auto Hidden
 ObjectReference Property PlacedBook18Ref Auto Hidden
 ObjectReference Property BookMarkerLate Auto Hidden
-ObjectReference Property OverflowContainer = None Auto Hidden
 {List of Placed Book Refs}
 
 Bool Property adAlreadyLoaded2 = FALSE Auto Hidden
@@ -197,7 +196,6 @@ function UpdateBooks()
 		endIf
 		i+=1
 	endwhile
-	GoToState("") ; Now allow books to be updated again
 	
 	;Enable newly placed books
 	i=0
@@ -213,22 +211,26 @@ function UpdateBooks()
 		i+=1
 	endwhile
 	CurrentBookAmount = NumBooks
+	GoToState("") ; Now allow books to be updated again
 endFunction
 
-Event OnItemRemoved(Form akBaseItem, int aiItemCount, ObjectReference akItemReference, ObjectReference akDestContainer)
+event OnItemRemoved(Form akBaseItem, int aiItemCount, ObjectReference akItemReference, ObjectReference akDestContainer)
 	if BlockBooks == FALSE
 		; If the item is a book find the corresponding book reference and remove it.
 		;MessageBox("BOOKCASE - Form being Removed " + akBaseItem + " is a Book! Remove it from the list")
 		
-		int orient = orientation(akItemReference)
-		float itemWidth = getBookAmount(akItemReference, orient)
+		;int orient = orientation(akItemReference)
+		;float itemWidth = getBookAmount(akItemReference, orient)
 
-		if akItemReference.hasKeyword(VendorItemOreIngot)
-			itemWidth = 2 * itemWidth/3
-		endif
+		;if akItemReference.hasKeyword(VendorItemOreIngot)
+			;itemWidth = 2 * itemWidth/3
+		;endif
 
-		UsedSpace -= (itemWidth * aiItemCount)
-		shelfFull = FALSE
+		;UsedSpace -= (itemWidth * aiItemCount)
+
+		;if TotalDistance - UsedSpace > 15.0
+			;shelfFull = FALSE
+		;endif
         ;Debug.TraceAndBox("OnItemRemoved "+self+", NumBooks: "+NumBooks+", shelfFull: "+shelfFull+", UsedSpace: "+UsedSpace+", TotalDistance: "+TotalDistance+"Book Name: "+akItemReference.getName())
 		RemoveBooks(akBaseItem, aiItemCount)
 	else
@@ -239,17 +241,13 @@ Event OnItemRemoved(Form akBaseItem, int aiItemCount, ObjectReference akItemRefe
 endEvent
 
 
-Event OnItemAdded(Form akBaseItem, int aiItemCount, ObjectReference akItemReference, ObjectReference akSourceContainer)
+event OnItemAdded(Form akBaseItem, int aiItemCount, ObjectReference akItemReference, ObjectReference akSourceContainer)
 	itemAdded(akBaseItem, aiItemCount, akItemReference, akSourceContainer)
 endEvent
 
 function itemAdded(Form akBaseItem, int aiItemCount, ObjectReference akItemReference, ObjectReference akSourceContainer)
 	self.BlockActivation(true)
 	int aiItemDiff = 0
-
-	;while GetState() == "PlacingBooks"
-		;Wait(0.25)
-	;endWhile
 
 	; Check to see if there is room in the container.
 	if ((aiItemCount + NumBooks) > MaxBooks)
@@ -259,15 +257,9 @@ function itemAdded(Form akBaseItem, int aiItemCount, ObjectReference akItemRefer
 	endif
 
 	; Add any items that will fit
-	if !akSourceContainer
-		AddBooks(akItemReference, akBaseItem, aiItemCount)
-		;refresh(akItemReference)
-	else
-		AddBooks(akItemReference, akBaseItem, aiItemCount)
-	endif
+	AddBooks(akItemReference, akBaseItem, aiItemCount)
 
 	if containerFull
-	debug.TraceAndBox("Container Full MaxBooks="+MaxBooks)
 		; Remove the items that won't fit in the container
 		utility.waitMenuMode(0)
 		BookShelfNoMoreRoomMESSAGE.Show()
@@ -389,7 +381,7 @@ float Function getBookAmount(ObjectReference BookRef, int orient = 0)
 endFunction
 
 float function getDefaultWidth(Form itemType)
-	float retWidth = 6.0
+	float retWidth = 1.7
 
 	if itemType as Book
 		retWidth = 3.5
@@ -405,13 +397,13 @@ function AddBooks(ObjectReference item, Form BookBase, Int BookAmount)
         ;Debug.TraceAndBox("AddBooks, NumBooks: "+NumBooks)
 
 	while BookAmount > 0
-		if thereIsRoom(item, BookBase)
 			PlacedBooks[NumBooks] = BookBase
 			NumBooks += 1
+		if thereIsRoom(item, BookBase)
         ;Debug.TraceAndBox("AddBooks while, NumBooks: "+NumBooks)
 		else
         ;Debug.TraceAndBox("RemoveItem "+self+", NumBooks: "+NumBooks+", shelfFull: "+shelfFull+", UsedSpace: "+UsedSpace+", TotalDistance: "+TotalDistance+"Book Name: "+item.getName())
-			BlockBooks = true
+			;BlockBooks = true
 			self.RemoveItem(BookBase, 1, true, OverflowContainer)
 		endif
 		BookAmount -= 1
@@ -419,73 +411,53 @@ function AddBooks(ObjectReference item, Form BookBase, Int BookAmount)
 	CurrentBookAmount = NumBooks
 endFunction
 
-;bool function addToContainer(ObjectReference item)
-	;Form BookBase = item.GetBaseObject()
-
-	;while GetState() == "AddingBooks"
-		;Wait(0.25)
-	;endWhile
-
-	;GoToState("AddingBooks") ; Future calls should not mess with this stuff
-	;AddCount += 1
-	;debug.TraceAndBox("addToContainer, AddCount = "+AddCount)
-
-	;if thereIsRoom(item)
-		;PlacedBooks[NumBooks] = BookBase
-		;NumBooks += 1
-		;CurrentBookAmount = NumBooks
-		;AddItem(item,1,true)
-		;GoToState("") ; Future calls should not mess with this stuff
-		;return true
-	;else
-		;OverflowContainer.AddItem(item,1,true)
-		;GoToState("") ; Future calls should not mess with this stuff
-		;return false
-	;endif
-;endFunction
-
 bool function thereIsRoom(ObjectReference item, Form itemType)
 	if self.isFull()
 		return FALSE
 	endif
 
-	float itemWidth = 0.0
+	float itemWidth = 1.0
 
 	if item 
 		int orient = orientation(item)
 		itemWidth = getBookAmount(item, orient)
 
 		if item.hasKeyword(VendorItemOreIngot)
-			itemWidth = 2 * itemWidth/3
+			itemWidth = 1.5
 		endif
 	else
 		itemWidth = getDefaultWidth(itemType)
 	endif
 		
 
+	if (TotalOffset + itemWidth/TotalDistance) > (1.0 + (1.5 * MarkerHeight/TotalDistance))
+		return FALSE
+	else
+		return TRUE
+	endif
 	; Calculate Available Space
-	int i = 0
-        float slack = TotalDistance - UsedSpace
+	;int i = 0
+        ;float slack = TotalDistance - UsedSpace
 	;debug.TraceAndBox("slack="+slack+", UsedSpace="+UsedSpace+", itemWidth="+itemWidth+", TotalDistance="+TotalDistance)
 
-	if slack > itemWidth
+	;if slack > itemWidth
 		;if (slack - itemWidth) < 19.0
 			;shelfFull = TRUE
 		;else 
 			;shelfFull = FALSE
 		;endif
 			
-		UsedSpace += itemWidth 
-		return TRUE
-	else
-		if slack < 19.0
-			shelfFull = TRUE
-		else 
-			shelfFull = FALSE
-		endif
+		;UsedSpace += itemWidth 
+		;return TRUE
+	;else
+		;if slack < 16.0
+			;shelfFull = TRUE
+		;else 
+			;shelfFull = FALSE
+		;endif
 
-		return FALSE
-	endif
+		;return FALSE
+	;endif
 		
 endFunction
 
@@ -594,17 +566,21 @@ ObjectReference function updateOther(Form itemType, int index)
 	endif
 
 	if (TotalOffset + bookAmt/TotalDistance) > (1.0 + (1.5 * MarkerHeight/TotalDistance))
-		shelfFull = TRUE
 		retVal.disable()
 		retVal.delete()
-		;while NumBooks>index
-			;self.RemoveItem(PlacedBooks[ NumBooks - 1 ], 1, true, OverflowContainer)
+		int itemCount = NumBooks
+		while itemCount>index
+			self.RemoveItem(PlacedBooks[ itemCount - 1 ], 1, true, OverflowContainer)
 			;;self.RemoveItem(PlacedBooks[ NumBooks - 1 ], 1, true, Game.GetPlayer())
 			;PlacedBooks[ NumBooks - 1 ]=None
 			;NumBooks -= 1
-		;endwhile
-		Notification("Some items did not fit and have been given back")
+			itemCount -= 1
+		endwhile
+		Notification("Some items did not fit and have been returned to the Autodeck.")
+		shelfFull = TRUE
 		return None
+	elseif (TotalOffset + 12.0/TotalDistance) > (1.0 + (1.5 * MarkerHeight/TotalDistance))
+		shelfFull = TRUE
 	else
 		shelfFull = FALSE
 	endif
@@ -638,6 +614,8 @@ ObjectReference function positionBook(Form bookType, int index)
 		;Notification("Some items did not fit and have been given back")
 		shelfFull = TRUE
 		return None
+	elseif (TotalOffset + 12.0/TotalDistance) > (1.0 + (1.5 * MarkerHeight/TotalDistance))
+		shelfFull = TRUE
 	else
 		shelfFull = FALSE
 	endif

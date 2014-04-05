@@ -245,20 +245,27 @@ Event OnItemRemoved(Form akBaseItem, int aiItemCount, ObjectReference akItemRefe
 endEvent
 
 event OnItemAdded(Form akBaseItem, int aiItemCount, ObjectReference akItemReference, ObjectReference akSourceContainer)
-	Trace("PotionRack - Adding " + akBaseItem + " to the Potion Container from : "+ akSourceContainer)
+	;Trace("PotionRack - Adding " + akBaseItem + " to the Potion Container from : "+ akSourceContainer)
+	int overCount = 0
 	
 	; If the item being added is a potion then check to see if there is room in on the shelf.
-	if ((aiItemCount + CurrentBookAmount) <= MaxPotionsAllowed)
+	if ((aiItemCount + CurrentBookAmount) > MaxPotionsAllowed)
+		overCount = aiItemCount + CurrentBookAmount - MaxPotionsAllowed
+		aiItemCount -= overCount
+	endif
+		
+	if aiItemCount > 0
 		; There's room on teh shelf, manage the potion placement
 		CurrentBookAmount = CurrentBookAmount + aiItemCount
 		Trace("PotionRack - " + CurrentBookAmount + "/" + MaxPotionsAllowed + " There is room for another potion, lets place it on the shelf.")
-		if ( akSourceContainer != Game.getPlayer() )
-			AddPotionRef(akItemReference, aiItemCount)
-		else
+		;if ( akSourceContainer != Game.getPlayer() )
+			;AddPotionRef(akItemReference, aiItemCount)
+		;else
 			AddPotions(akBaseItem, aiItemCount)
-		endif
-	else
-		CurrentBookAmount = CurrentBookAmount + aiItemCount
+		;endif
+	endif
+
+	if overCount > 0
 		; There is no room on the shelf.  Tell the player this and give him his potion back.
 		Trace("PotionRack - " + CurrentBookAmount + "/" + MaxPotionsAllowed + " There's no more room for potions on this shelf.")
 
@@ -267,28 +274,15 @@ event OnItemAdded(Form akBaseItem, int aiItemCount, ObjectReference akItemRefere
 			;MessageBox("You can't place that many potions on this shelf")
 			PotionShelfNoMoreRoomMESSAGE.Show()
 			Trace("PotionRack - Remove it from this container...")
-			self.RemoveItem(akBaseItem, aiItemCount, true, Game.GetPlayer())
+			self.RemoveItem(akBaseItem, overCount, true, OverflowContainer)
 			Trace("PotionRack - ...and give it back to the player")
 		else
-			self.RemoveItem(akBaseItem, aiItemCount, true, Game.GetPlayer())
+			self.RemoveItem(akBaseItem, overCount, true, OverflowContainer)
 			Trace("PotionRack - ...and give it back to the player")
 		endif
 
 		;BlockPotions = TRUE
 	endif
-	;else
-		; The item placed in the container isn't a potion, so give the player back and tell him only potions are allowed.
-		;Trace("PotionRack - Form " + akBaseItem + " is NOT a Potion!")
-		;Trace("PotionRack - Since the placed item wasn't a potion remove it from the container...")
-
-		;self.RemoveItem(akBaseItem, aiItemCount)
-		;Trace("PotionRack - ...and give it back to the player")
-
-		;(Game.GetPlayer()).AddItem(akBaseItem, aiItemCount, True)
-		;utility.WaitMenuMode(0)
-		;;MessageBox("You can only place potions on this shelf")
-		;PotionShelfNotAPotionMESSAGE.Show()
-	;endif
 	
 endEvent
 
@@ -709,7 +703,6 @@ function AddPotionRef(ObjectReference PotionRef, Int PotionAmount)
 		        PlacedPotion18Ref.BlockActivation()
 			PotionAmount = PotionAmount - 1
 		endif
-		;CurrentBookAmount = CurrentBookAmount + 1
 	endWhile
 endFunction
 

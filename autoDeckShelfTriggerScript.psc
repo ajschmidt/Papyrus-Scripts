@@ -38,9 +38,10 @@ auto STATE WaitForBooks
 			else
 				; Player isnt' grabbing this reference, check to see if it's in the container.
 				if Shelfcontainer.GetItemCount(TriggerRef.GetBaseObject()) >= 1
+					;debug.TraceAndBox("In Trigger Script; Item Removed: "+TriggerRef.GetName())
 					Shelfcontainer.RemoveItem(TriggerRef.GetBaseObject(), 1)
-					(Shelfcontainer as autoDeckContainerBase).CurrentBookAmount = (Shelfcontainer as autoDeckContainerBase).CurrentBookAmount - 1
-					(ShelfContainer as autoDeckContainerBase).RemoveBooks((TriggerRef.GetBaseObject()), 1)
+					;(Shelfcontainer as autoDeckContainerBase).CurrentBookAmount = (Shelfcontainer as autoDeckContainerBase).CurrentBookAmount - 1
+					;(ShelfContainer as autoDeckContainerBase).RemoveBooks((TriggerRef.GetBaseObject()), 1)
 				else
 				; There is no book based on this form in the container
 					;Trace("DARYL - " + self + " Container doesn't contain this book")

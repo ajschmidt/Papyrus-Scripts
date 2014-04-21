@@ -15,6 +15,7 @@ autoDeckContainerBase Property Potions09  Auto
 autoDeckContainerBase Property Potions10  Auto  
 autoDeckContainerBase Property Potions11  Auto  
 autoDeckContainerBase Property Potions12  Auto  
+autoDeckContainerBase[] PotionContainers =  None
 
 autoDeckContainerBase Property Ingots01  Auto  
 autoDeckContainerBase Property Ingots02  Auto  
@@ -28,25 +29,31 @@ autoDeckContainerBase Property Ingots09  Auto
 autoDeckContainerBase Property Ingots10  Auto  
 autoDeckContainerBase Property Ingots11  Auto  
 autoDeckContainerBase Property Ingots12  Auto  
+autoDeckContainerBase[] IngotContainers =  None
 
-autoDeckShelfContainerScript Property Books01  Auto  
-autoDeckShelfContainerScript Property Books02  Auto  
-autoDeckShelfContainerScript Property Books03  Auto  
+autoDeckContainerBase Property Books01  Auto  
+autoDeckContainerBase Property Books02  Auto  
+autoDeckContainerBase Property Books03  Auto  
+autoDeckContainerBase[] BookContainers =  None
 
 autoDeckContainerBase Property Gems01  Auto  
 autoDeckContainerBase Property Gems02  Auto  
 autoDeckContainerBase Property Gems03  Auto  
+autoDeckContainerBase[] GemContainers =  None
 
 autoDeckContainerBase Property SoulGems01  Auto  
 autoDeckContainerBase Property SoulGems02  Auto  
+autoDeckContainerBase[] SoulGemContainers =  None
 
 autoDeckContainerBase Property Scrolls01  Auto  
 autoDeckContainerBase Property Scrolls02  Auto  
+autoDeckContainerBase[] ScrollContainers =  None
 
 autoDeckContainerBase Property Jewelry01  Auto  
 autoDeckContainerBase Property Jewelry02  Auto  
 autoDeckContainerBase Property Jewelry03  Auto  
 autoDeckContainerBase Property Jewelry04  Auto  
+autoDeckContainerBase[] JewelryContainers =  None
 
 autoDeckContainerBase Property Dishes01  Auto  
 autoDeckContainerBase Property Dishes02  Auto  
@@ -54,6 +61,7 @@ autoDeckContainerBase Property Dishes02  Auto
 autoDeckContainerBase Property Skulls01  Auto  
 autoDeckContainerBase Property Skulls02  Auto  
 autoDeckContainerBase Property Skulls03  Auto  
+autoDeckContainerBase[] SkullContainers =  None
 
 autoDeckContainerBase Property Tall01  Auto  
 autoDeckContainerBase Property Tall02  Auto  
@@ -61,10 +69,12 @@ autoDeckContainerBase Property Tall03  Auto
 autoDeckContainerBase Property Tall04  Auto  
 autoDeckContainerBase Property Tall05  Auto  
 autoDeckContainerBase Property Tall06  Auto  
+autoDeckContainerBase[] TallContainers =  None
 
 autoDeckContainerBase Property TrollSkulls01  Auto  
 autoDeckContainerBase Property TrollSkulls02  Auto  
 autoDeckContainerBase Property TrollSkulls03  Auto  
+autoDeckContainerBase[] TrollSkullContainers =  None
 
 autoDeckContainerBase Property Mixed01  Auto  
 autoDeckContainerBase Property Mixed02  Auto  
@@ -88,6 +98,7 @@ autoDeckContainerBase Property Mixed19  Auto
 autoDeckContainerBase Property Mixed20  Auto  
 autoDeckContainerBase Property Mixed21  Auto  
 autoDeckContainerBase Property Mixed22  Auto  
+autoDeckContainerBase[] MixedContainers =  None
 
 ObjectReference Property OverflowContainer Auto
 
@@ -109,6 +120,8 @@ Keyword Property VendorItemTool  Auto
 
 int BookCounter = 0
 int AddCounter = 0
+int MaxItems = 640
+int TotalItems = 0
 
 Form[] inventoryRef = None
 autoDeckContainerBase[] refreshList = None
@@ -118,73 +131,168 @@ event OnCellLoad()
 	BookCounter = 0
 	AddCounter = 0
 	inventoryRef = new Form[128]
-	refreshList = new autoDeckContainerBase[56]
-
-	Books01.OverflowContainer = OverflowContainer
-	Books02.OverflowContainer = OverflowContainer
-	Books03.OverflowContainer = OverflowContainer
-	Mixed01.OverflowContainer = OverflowContainer
-	Mixed02.OverflowContainer = OverflowContainer
-	Mixed03.OverflowContainer = OverflowContainer
-	Mixed04.OverflowContainer = OverflowContainer
-	Mixed05.OverflowContainer = OverflowContainer
-	Mixed06.OverflowContainer = OverflowContainer
-	Mixed07.OverflowContainer = OverflowContainer
-	Mixed08.OverflowContainer = OverflowContainer
-	Mixed09.OverflowContainer = OverflowContainer
-	Mixed10.OverflowContainer = OverflowContainer
-	Mixed11.OverflowContainer = OverflowContainer
-	Mixed12.OverflowContainer = OverflowContainer
-	Mixed13.OverflowContainer = OverflowContainer
-	Mixed14.OverflowContainer = OverflowContainer
-	Mixed15.OverflowContainer = OverflowContainer
-	Mixed16.OverflowContainer = OverflowContainer
-	Mixed17.OverflowContainer = OverflowContainer
-	Mixed18.OverflowContainer = OverflowContainer
-	Mixed19.OverflowContainer = OverflowContainer
-	Mixed20.OverflowContainer = OverflowContainer
-	Mixed21.OverflowContainer = OverflowContainer
-	Mixed22.OverflowContainer = OverflowContainer
-	Ingots01.OverflowContainer = OverflowContainer
-	Ingots02.OverflowContainer = OverflowContainer
-	Ingots03.OverflowContainer = OverflowContainer
-	Ingots04.OverflowContainer = OverflowContainer
-	Ingots05.OverflowContainer = OverflowContainer
-	Ingots06.OverflowContainer = OverflowContainer
-	Ingots07.OverflowContainer = OverflowContainer
-	Ingots08.OverflowContainer = OverflowContainer
-	Ingots09.OverflowContainer = OverflowContainer
-	Ingots10.OverflowContainer = OverflowContainer
-	Ingots11.OverflowContainer = OverflowContainer
-	Ingots12.OverflowContainer = OverflowContainer
-	Gems01.OverflowContainer = OverflowContainer
-	Gems02.OverflowContainer = OverflowContainer
-	Gems03.OverflowContainer = OverflowContainer
-	SoulGems01.OverflowContainer = OverflowContainer
-	SoulGems02.OverflowContainer = OverflowContainer
-	Jewelry01.OverflowContainer = OverflowContainer
-	Jewelry02.OverflowContainer = OverflowContainer
-	Jewelry03.OverflowContainer = OverflowContainer
-	Jewelry04.OverflowContainer = OverflowContainer
+	refreshList = new autoDeckContainerBase[128]
+	initBookContainers()
+	initMixedContainers()
+	initPotionContainers()
+	initIngotContainers()
+	initGemContainers()
+	initSoulGemContainers()
+	initJewelryContainers()
+	initScrollContainers()
 	Dishes01.OverflowContainer = OverflowContainer
 	Dishes02.OverflowContainer = OverflowContainer
-	Skulls01.OverflowContainer = OverflowContainer
-	Skulls02.OverflowContainer = OverflowContainer
-	Skulls03.OverflowContainer = OverflowContainer
-	Tall01.OverflowContainer = OverflowContainer
-	Tall02.OverflowContainer = OverflowContainer
-	Tall03.OverflowContainer = OverflowContainer
-	Tall04.OverflowContainer = OverflowContainer
-	Tall05.OverflowContainer = OverflowContainer
-	Tall06.OverflowContainer = OverflowContainer
-	TrollSkulls01.OverflowContainer = OverflowContainer
-	TrollSkulls02.OverflowContainer = OverflowContainer
-	TrollSkulls03.OverflowContainer = OverflowContainer
+	initSkullContainers()
+	initTallContainers()
+	initTrollSkullContainers()
 endEvent
+
+function initPotionContainers()
+	PotionContainers =  new autoDeckContainerBase[12]
+	PotionContainers[0] = Potions01
+	PotionContainers[1] = Potions02
+	PotionContainers[2] = Potions03
+	PotionContainers[3] = Potions04
+	PotionContainers[4] = Potions05
+	PotionContainers[5] = Potions06
+	PotionContainers[6] = Potions07
+	PotionContainers[7] = Potions08
+	PotionContainers[8] = Potions09
+	PotionContainers[9] = Potions10
+	PotionContainers[10] = Potions11
+	PotionContainers[11] = Potions12
+	setOverflowContainer(PotionContainers)
+endFunction
+
+function initMixedContainers()
+	MixedContainers =  new autoDeckContainerBase[12]
+	MixedContainers[0] = Mixed01
+	MixedContainers[1] = Mixed02
+	MixedContainers[2] = Mixed03
+	MixedContainers[3] = Mixed04
+	MixedContainers[4] = Mixed05
+	MixedContainers[5] = Mixed06
+	MixedContainers[6] = Mixed07
+	MixedContainers[7] = Mixed08
+	MixedContainers[8] = Mixed09
+	MixedContainers[9] = Mixed10
+	MixedContainers[10] = Mixed11
+	MixedContainers[11] = Mixed12
+	MixedContainers[12] = Mixed13
+	MixedContainers[13] = Mixed14
+	MixedContainers[14] = Mixed15
+	MixedContainers[15] = Mixed16
+	MixedContainers[16] = Mixed17
+	MixedContainers[17] = Mixed18
+	MixedContainers[18] = Mixed19
+	MixedContainers[19] = Mixed20
+	MixedContainers[20] = Mixed21
+	MixedContainers[21] = Mixed22
+	setOverflowContainer(MixedContainers)
+endFunction
+
+function initIngotContainers()
+	IngotContainers =  new autoDeckContainerBase[12]
+	IngotContainers[0] = Ingots01
+	IngotContainers[1] = Ingots02
+	IngotContainers[2] = Ingots03
+	IngotContainers[3] = Ingots04
+	IngotContainers[4] = Ingots05
+	IngotContainers[5] = Ingots06
+	IngotContainers[6] = Ingots07
+	IngotContainers[7] = Ingots08
+	IngotContainers[8] = Ingots09
+	IngotContainers[9] = Ingots10
+	IngotContainers[10] = Ingots11
+	IngotContainers[11] = Ingots12
+	setOverflowContainer(IngotContainers)
+endFunction
+
+function initBookContainers()
+	BookContainers =  new autoDeckContainerBase[3]
+	BookContainers[0] = Books01
+	BookContainers[1] = Books02
+	BookContainers[2] = Books03
+	setOverflowContainer(BookContainers)
+endFunction
+
+function initGemContainers()
+	GemContainers =  new autoDeckContainerBase[3]
+	GemContainers[0] = Gems01
+	GemContainers[1] = Gems02
+	GemContainers[2] = Gems03
+	setOverflowContainer(GemContainers)
+endFunction
+
+function initSoulGemContainers()
+	SoulGemContainers =  new autoDeckContainerBase[2]
+	SoulGemContainers[0] = SoulGems01
+	SoulGemContainers[1] = SoulGems02
+	setOverflowContainer(SoulGemContainers)
+endFunction
+
+function initScrollContainers()
+	ScrollContainers =  new autoDeckContainerBase[2]
+	ScrollContainers[0] = Scrolls01
+	ScrollContainers[1] = Scrolls02
+	setOverflowContainer(ScrollContainers)
+endFunction
+
+function initSkullContainers()
+	SkullContainers =  new autoDeckContainerBase[3]
+	SkullContainers[0] = Skulls01
+	SkullContainers[1] = Skulls02
+	SkullContainers[2] = Skulls03
+	setOverflowContainer(SkullContainers)
+endFunction
+
+function initJewelryContainers()
+	JewelryContainers =  new autoDeckContainerBase[6]
+	JewelryContainers[0] = Jewelry01
+	JewelryContainers[1] = Jewelry02
+	JewelryContainers[2] = Jewelry03
+	JewelryContainers[3] = Jewelry04
+	setOverflowContainer(JewelryContainers)
+endFunction
+
+function initTrollSkullContainers()
+	TrollSkullContainers =  new autoDeckContainerBase[3]
+	TrollSkullContainers[0] = TrollSkulls01
+	TrollSkullContainers[1] = TrollSkulls02
+	TrollSkullContainers[2] = TrollSkulls03
+	setOverflowContainer(TrollSkullContainers)
+endFunction
+
+function initTallContainers()
+	TallContainers =  new autoDeckContainerBase[6]
+	TallContainers[0] = Tall01
+	TallContainers[1] = Tall02
+	TallContainers[2] = Tall03
+	TallContainers[3] = Tall04
+	TallContainers[4] = Tall05
+	TallContainers[5] = Tall06
+	setOverflowContainer(TallContainers)
+endFunction
+
+function setOverflowContainer(autoDeckContainerBase[] containers)
+	int index = containers.length - 1
+	while index >= 0
+		containers[index].OverflowContainer = self
+		index -= 1
+	endWhile 
+endFunction
 
 event OnItemAdded(Form itemBase, int itemCount, ObjectReference itemRef, ObjectReference sourceContainer)
 	; we only need this inventory to keep track of the references in the actual container
 	;debug.TraceAndBox("OnItemAdded(), itemCount = "+itemCount+", existing = "+inventoryRef.Find(itemBase))
+	TotalItems += itemCount
+	int diff = TotalItems - MaxItems
+	if diff > 0
+		Notification("Add more after the AutoDeck is finished.")
+		Notification("You can only place a maximum of "+MaxItems+" items at once.")
+		RemoveItem(itemBase, diff, false, Game.getPlayer())
+		itemCount -= diff
+	endif
 	if itemCount > 0 && inventoryRef.Find(itemBase) < 0
 		int i = inventoryRef.Find(None)
 	;debug.TraceAndBox("OnItemAdded(), next index = "+i)
@@ -194,42 +302,37 @@ event OnItemAdded(Form itemBase, int itemCount, ObjectReference itemRef, ObjectR
 endEvent
 
 event OnItemRemoved(Form itemBase, int itemCount, ObjectReference itemRef, ObjectReference targetContainer)
-;	if targetContainer as autoDeckContainerBase
-;	else
-; THIS METHOD NEEDS WORK
-		int i = self.GetItemCount(itemBase) 
-		if i < 1 
-			int loc = inventoryRef.Find(itemBase) 
-			if loc >= 0
-				inventoryRef[loc] = None
-			endif
+	TotalItems -= itemCount
+	int i = self.GetItemCount(itemBase) 
+	if i < 1 
+		int loc = inventoryRef.Find(itemBase) 
+		if loc >= 0
+			inventoryRef[loc] = None
 		endif
-;	endif
+	endif
 			
 endEvent
 
 event OnActivate(ObjectReference akActionRef)
 	;debug.TraceAndBox("OnActivate(), formCounter = "+formCounter)
 	self.BlockActivation(true)
-	refreshList = new autoDeckContainerBase[56]
+	refreshList = new autoDeckContainerBase[128]
 	Wait(0.25)
 	bool again = false
 	int itemCount = 0
 	Form nextForm = None
 	int end = inventoryRef.Find(None)
-
-	if end < 0 
-		end = 128
-	endif
+	int totalCount = 0
+	end = 128
 
 	int index = 0
 	while index < end
 	;debug.TraceAndBox("OnActivate(), end = "+end)
 		nextForm = inventoryRef[index]
 
-		if nextForm != None ;we shouldn't need this check. Remove it later
+		if nextForm != None 
 			itemCount = self.GetItemCount(nextForm)
-	;debug.TraceAndBox("OnActivate(), form = "+nextForm.getName()+", itemCount = "+itemCount)
+	;debug.TraceAndBox("inventoryRef["+index+"], form = "+nextForm.getName()+", itemCount = "+itemCount)
 			int blockCount = 0
 
 			; Place no more than 128 items at a time 
@@ -240,9 +343,9 @@ event OnActivate(ObjectReference akActionRef)
 					blockCount = itemCount
 				endif
 
-				placeItems(nextForm, blockCount)
-
+				placeItems(nextForm, blockCount, totalCount % 4)
 				itemCount -= blockCount
+				totalCount += blockCount
 			endwhile
 
 			again = TRUE
@@ -253,19 +356,17 @@ event OnActivate(ObjectReference akActionRef)
 	endWhile
 
 	Wait(2)
-	end = refreshList.Find(None)
-
-	if end < 0 
-		end = 56
-	endif
-
+	end = 128
 	index = 0
 	ObjectReference adContainer = None
 
 	while index < end
 		adContainer = refreshList[index]
-		adContainer.Activate(self)
-		Wait(02)
+
+		if adContainer != None
+			adContainer.Activate(self)
+			Wait(05)
+		endif
 		index += 1
 	endWhile
 	
@@ -276,7 +377,8 @@ event OnActivate(ObjectReference akActionRef)
 	endif
 endEvent
 
-function placeItems(Form akActionRef, int itemCount)	
+; rotation is used to modulate which shelf is targeted
+function placeItems(Form akActionRef, int itemCount, int rotation)	
 				 
 	;int kw = akActionRef.GetNumKeywords()
 	;while kw > 0
@@ -292,227 +394,59 @@ function placeItems(Form akActionRef, int itemCount)
 	bool placed = false;
 
 	if (isIngot(akActionRef))
-		placed = true;
-		if (Ingots01 && !Ingots01.isFull())
-			placeItem(Ingots01, akActionRef, itemCount) 
-		elseif (Ingots02 && !Ingots02.isFull())
-			placeItem(Ingots02, akActionRef, itemCount) 
-		elseif (Ingots03 && !Ingots03.isFull())
-			placeItem(Ingots03, akActionRef, itemCount) 
-		elseif (Ingots04 && !Ingots04.isFull())
-			placeItem(Ingots04, akActionRef, itemCount) 
-		elseif (Ingots05 && !Ingots05.isFull())
-			placeItem(Ingots05, akActionRef, itemCount) 
-		elseif (Ingots06 && !Ingots06.isFull())
-			placeItem(Ingots06, akActionRef, itemCount) 
-		elseif (Ingots07 && !Ingots07.isFull())
-			placeItem(Ingots07, akActionRef, itemCount) 
-		elseif (Ingots08 && !Ingots08.isFull())
-			placeItem(Ingots08, akActionRef, itemCount) 
-		elseif (Ingots09 && !Ingots09.isFull())
-			placeItem(Ingots09, akActionRef, itemCount) 
-		elseif (Ingots10 && !Ingots10.isFull())
-			placeItem(Ingots10, akActionRef, itemCount) 
-		elseif (Ingots11 && !Ingots11.isFull())
-			placeItem(Ingots11, akActionRef, itemCount) 
-		elseif (Ingots12 && !Ingots12.isFull())
-			placeItem(Ingots12, akActionRef, itemCount) 
-		else
-			placed = false;
-		endif
+		placed = findOpeningAndPlace(IngotContainers, akActionRef, itemCount)
 	elseif (akActionRef.getName() == "Skull")
-		placed = true;
-		if (Skulls01 && !Skulls01.isFull())
-			placeItem(Skulls01, akActionRef, itemCount) 
-		elseif (Skulls02 && !Skulls02.isFull())
-			placeItem(Skulls02, akActionRef, itemCount) 
-		elseif (Skulls03 && !Skulls03.isFull())
-			placeItem(Skulls03, akActionRef, itemCount) 
-		else
-			placed = false
-		endif
+		placed = findOpeningAndPlace(SkullContainers, akActionRef, itemCount)
 	elseif (akActionRef.getName() == "Troll Skull")
-		placed = true;
-		if (TrollSkulls01 && !TrollSkulls01.isFull())
-			placeItem(TrollSkulls01, akActionRef, itemCount) 
-		elseif (TrollSkulls02 && !TrollSkulls02.isFull())
-			placeItem(TrollSkulls02, akActionRef, itemCount) 
-		elseif (TrollSkulls03 && !TrollSkulls03.isFull())
-			placeItem(TrollSkulls03, akActionRef, itemCount) 
-		else
-			placed = false
-		endif
+		placed = findOpeningAndPlace(TrollSkullContainers, akActionRef, itemCount)
 	elseif (akActionRef.HasKeyword(VendorItemJewelry))
-		placed = true
-		if (Jewelry01 && !Jewelry01.isFull())
-			placeItem(Jewelry01, akActionRef, itemCount) 
-		elseif (Jewelry02 && !Jewelry02.isFull())
-			placeItem(Jewelry02, akActionRef, itemCount) 
-		elseif (Jewelry03 && !Jewelry03.isFull())
-			placeItem(Jewelry03, akActionRef, itemCount) 
-		elseif (Jewelry04 && !Jewelry04.isFull())
-			placeItem(Jewelry04, akActionRef, itemCount) 
-		else
-			placed = false
-		endif
+		placed = findOpeningAndPlace(JewelryContainers, akActionRef, itemCount)
 	elseif (isGem(akActionRef))
-		placed = true
-		if (Gems01 && !Gems01.isFull())
-			placeItem(Gems01, akActionRef, itemCount) 
-		elseif (Gems02 && !Gems02.isFull())
-			placeItem(Gems02, akActionRef, itemCount) 
-		elseif (Gems03 && !Gems03.isFull())
-			placeItem(Gems03, akActionRef, itemCount) 
-		else
-			placed = false
-		endif
+		placed = findOpeningAndPlace(GemContainers, akActionRef, itemCount)
 	elseif (isSoulGem(akActionRef))
-		placed = true
-		if (SoulGems01 && !SoulGems01.isFull())
-			placeItem(SoulGems01, akActionRef, itemCount) 
-		elseif (SoulGems02 && !SoulGems02.isFull())
-			placeItem(SoulGems02, akActionRef, itemCount) 
-		else
-			placed = false
-		endif
+		placed = findOpeningAndPlace(SoulGemContainers, akActionRef, itemCount)
 	elseif (isScroll(akActionRef))
-		placed = true
-		if (Scrolls01 && !Scrolls01.isFull())
-			placeItem(Scrolls01, akActionRef, itemCount) 
-		elseif (Scrolls02 && !Scrolls02.isFull())
-			placeItem(Scrolls02, akActionRef, itemCount) 
-		else
-			placed = false
-		endif
+		placed = findOpeningAndPlace(ScrollContainers, akActionRef, itemCount)
 	elseif (isPotion(akActionRef))
-		placed = true
-		if (Potions01 && !Potions01.isFull())
-			placeItem(Potions01, akActionRef, itemCount) 
-		elseif (Potions02 && !Potions02.isFull())
-			placeItem(Potions02, akActionRef, itemCount) 
-		elseif (Potions03 && !Potions03.isFull())
-			placeItem(Potions03, akActionRef, itemCount) 
-		elseif (Potions04 && !Potions04.isFull())
-			placeItem(Potions04, akActionRef, itemCount) 
-		elseif (Potions05 && !Potions05.isFull())
-			placeItem(Potions05, akActionRef, itemCount) 
-		elseif (Potions06 && !Potions06.isFull())
-			placeItem(Potions06, akActionRef, itemCount) 
-		elseif (Potions07 && !Potions07.isFull())
-			placeItem(Potions07, akActionRef, itemCount) 
-		elseif (Potions08 && !Potions08.isFull())
-			placeItem(Potions08, akActionRef, itemCount) 
-		elseif (Potions09 && !Potions09.isFull())
-			placeItem(Potions09, akActionRef, itemCount) 
-		elseif (Potions10 && !Potions10.isFull())
-			placeItem(Potions10, akActionRef, itemCount) 
-		elseif (Potions11 && !Potions11.isFull())
-			placeItem(Potions11, akActionRef, itemCount) 
-		elseif (Potions12 && !Potions12.isFull())
-			placeItem(Potions12, akActionRef, itemCount) 
-		else
-			placed = false
-		endif
+		placed = findOpeningAndPlace(PotionContainers, akActionRef, itemCount)
 	elseif(isSpellBook(akActionRef))
-		placed = placeBookOnShelf(Books03, akActionRef, itemCount)
-	elseif (isBook(akActionRef))
-		placed = placeBookOnShelf(Books01, akActionRef, itemCount)
-
-	        if !placed
-	 		placed = placeBookOnShelf(Books02, akActionRef, itemCount)		
-		endif
-
-	        if !placed
-	 		placed = placeBookOnShelf(Books03, akActionRef, itemCount)		
-		endif
-	elseif (isTall(akActionRef))
 		placed = true
-		if (Tall01 && !Tall01.isFull())
-			placeItem(Tall01, akActionRef, itemCount) 
-		elseif (Tall02 && !Tall02.isFull())
-			placeItem(Tall02, akActionRef, itemCount) 
-		elseif (Tall03 && !Tall03.isFull())
-			placeItem(Tall03, akActionRef, itemCount) 
-		elseif (Tall04 && !Tall04.isFull())
-			placeItem(Tall04, akActionRef, itemCount) 
-		elseif (Tall05 && !Tall05.isFull())
-			placeItem(Tall05, akActionRef, itemCount) 
-		elseif (Tall06 && !Tall06.isFull())
-			placeItem(Tall06, akActionRef, itemCount) 
+		if (Books03 && !Books03.isFull())
+			placeItem(Books03, akActionRef, itemCount) 
 		else
 			placed = false
 		endif
+	elseif (isBook(akActionRef))
+		placed = findOpeningAndPlace(BookContainers, akActionRef, itemCount)
+	elseif (isTall(akActionRef))
+		placed = findOpeningAndPlace(TallContainers, akActionRef, itemCount)
 	endif
 	
 	; If we could not find a special shelf for the item 
 	; then just put it on one of the general shelves
 	if (!placed) 
-		placed = true
-		if (Mixed01 && !Mixed01.isFull())
-			placeItem(Mixed01, akActionRef, itemCount) 
-		elseif (Mixed02 && !Mixed02.isFull())
-			placeItem(Mixed02, akActionRef, itemCount) 
-		elseif (Mixed03 && !Mixed03.isFull())
-			placeItem(Mixed03, akActionRef, itemCount) 
-		elseif (Mixed04 && !Mixed04.isFull())
-			placeItem(Mixed04, akActionRef, itemCount) 
-		elseif (Mixed05 && !Mixed05.isFull())
-			placeItem(Mixed05, akActionRef, itemCount) 
-		elseif (Mixed06 && !Mixed06.isFull())
-			placeItem(Mixed06, akActionRef, itemCount) 
-		elseif (Mixed07 && !Mixed07.isFull())
-			placeItem(Mixed07, akActionRef, itemCount) 
-		elseif (Mixed08 && !Mixed08.isFull())
-			placeItem(Mixed08, akActionRef, itemCount) 
-		elseif (Mixed09 && !Mixed09.isFull())
-			placeItem(Mixed09, akActionRef, itemCount) 
-		elseif (Mixed10 && !Mixed10.isFull())
-			placeItem(Mixed10, akActionRef, itemCount) 
-		elseif (Mixed11 && !Mixed11.isFull())
-			placeItem(Mixed11, akActionRef, itemCount) 
-		elseif (Mixed12 && !Mixed12.isFull())
-			placeItem(Mixed12, akActionRef, itemCount) 
-		elseif (Mixed13 && !Mixed13.isFull())
-			placeItem(Mixed13, akActionRef, itemCount) 
-		elseif (Mixed14 && !Mixed14.isFull())
-			placeItem(Mixed14, akActionRef, itemCount) 
-		elseif (Mixed15 && !Mixed15.isFull())
-			placeItem(Mixed15, akActionRef, itemCount) 
-		elseif (Mixed16 && !Mixed16.isFull())
-			placeItem(Mixed16, akActionRef, itemCount) 
-		elseif (Mixed17 && !Mixed17.isFull())
-			placeItem(Mixed17, akActionRef, itemCount) 
-		elseif (Mixed18 && !Mixed18.isFull())
-			placeItem(Mixed18, akActionRef, itemCount) 
-		elseif (Mixed19 && !Mixed19.isFull())
-			placeItem(Mixed19, akActionRef, itemCount) 
-		elseif (Mixed20 && !Mixed20.isFull())
-			placeItem(Mixed20, akActionRef, itemCount) 
-		elseif (Mixed21 && !Mixed21.isFull())
-			placeItem(Mixed21, akActionRef, itemCount) 
-		elseif (Mixed22 && !Mixed22.isFull())
-			placeItem(Mixed22, akActionRef, itemCount) 
-		else
-			placed = false
-		endif
-  
+		placed = findOpeningAndPlace(MixedContainers, akActionRef, itemCount)
 	endif
 
 	; if we still don't have a place for the item
 	; then give it back to the player
 	if !placed
-		Game.GetPlayer().AddItem(akActionRef, 1, false)
+		self.RemoveItem(akActionRef, itemCount, true, Game.GetPlayer())
 	endif
 	
 endFunction
  
-bool function placeBookOnShelf(autoDeckShelfContainerScript targetShelf, Form aBook, int itemCount)  
-		;debug.TraceAndBox("placeBookOnShelf, targetShelf = "+targetShelf)
-	if (targetShelf && !targetShelf.isFull())
-		placeItem(targetShelf, aBook, itemCount)
+bool function findOpeningAndPlace(autoDeckContainerBase[] containers, Form akActionRef, int itemCount)
+	int len = containers.length
+	int i=0
+	while i < len && (!containers[i] || containers[i].isFull())
+		i += 1
+	endWhile
+	if i < len
+		placeItem(containers[i], akActionRef, itemCount) 
 		return true
 	else
-		return false	
+		return false
 	endif
 endFunction
 
@@ -522,6 +456,7 @@ function placeItem(autoDeckContainerBase targetShelf, Form itemType, int itemCou
 		i = refreshList.Find(None)
 	endif
 	refreshList[i] = targetShelf
+	; add Item to the targetShelf
 	self.RemoveItem(itemType, itemCount, true, targetShelf)
 endFunction
 

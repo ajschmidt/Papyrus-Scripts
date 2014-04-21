@@ -185,7 +185,7 @@ endEVENT
 
 EVENT OnActivate(ObjectReference akActionRef)
 	; Removing all items from container as a precaution
-	Trace("POTIONS - I've been ACTIVATED!")
+	Trace("POTIONS - I've been ACTIVATED!",3)
 	PotionShelfRoomLeftMESSAGE.Show((MaxPotionsAllowed - CurrentBookAmount))
 	;debug.Notification("You can place " + (MaxPotionsAllowed - CurrentBookAmount) + " more potions on this shelf.")
 
@@ -193,7 +193,6 @@ EVENT OnActivate(ObjectReference akActionRef)
 		PotionShelfFirstActivateMESSAGE.Show()
 		PotionShelfGlobal.SetValue(1)
 	endif
-	;CurrentBookAmount = 0
 
 	if PotionShelfTrigger01Ref
 		PotionShelfTrigger01Ref.GoToState("IgnorePotions")
@@ -247,41 +246,27 @@ endEvent
 event OnItemAdded(Form akBaseItem, int aiItemCount, ObjectReference akItemReference, ObjectReference akSourceContainer)
 	;Trace("PotionRack - Adding " + akBaseItem + " to the Potion Container from : "+ akSourceContainer)
 	int overCount = 0
+	int addedCount = 0
 	
-	; If the item being added is a potion then check to see if there is room in on the shelf.
-	if ((aiItemCount + CurrentBookAmount) > MaxPotionsAllowed)
-		overCount = aiItemCount + CurrentBookAmount - MaxPotionsAllowed
-		aiItemCount -= overCount
-	endif
-		
 	if aiItemCount > 0
-		; There's room on teh shelf, manage the potion placement
-		CurrentBookAmount = CurrentBookAmount + aiItemCount
-		Trace("PotionRack - " + CurrentBookAmount + "/" + MaxPotionsAllowed + " There is room for another potion, lets place it on the shelf.")
-		;if ( akSourceContainer != Game.getPlayer() )
-			;AddPotionRef(akItemReference, aiItemCount)
-		;else
-			AddPotions(akBaseItem, aiItemCount)
-		;endif
+		addedCount = AddPotions(akBaseItem, aiItemCount)
+		CurrentBookAmount = CurrentBookAmount + addedCount
+		; If there wasn't room to place them all then there will be an
+		; overCount
+		overCount = aiItemCount - addedCount
 	endif
 
 	if overCount > 0
 		; There is no room on the shelf.  Tell the player this and give him his potion back.
-		Trace("PotionRack - " + CurrentBookAmount + "/" + MaxPotionsAllowed + " There's no more room for potions on this shelf.")
-
 		if (akSourceContainer)
 			utility.waitMenuMode(0)
 			;MessageBox("You can't place that many potions on this shelf")
 			PotionShelfNoMoreRoomMESSAGE.Show()
 			Trace("PotionRack - Remove it from this container...")
-			self.RemoveItem(akBaseItem, overCount, true, OverflowContainer)
-			Trace("PotionRack - ...and give it back to the player")
-		else
-			self.RemoveItem(akBaseItem, overCount, true, OverflowContainer)
-			Trace("PotionRack - ...and give it back to the player")
 		endif
-
-		;BlockPotions = TRUE
+	        BlockPotions = TRUE
+		self.RemoveItem(akBaseItem, overCount, true, OverflowContainer)
+		Trace("PotionRack - ...and give it back to the player", 3)
 	endif
 	
 endEvent
@@ -706,83 +691,88 @@ function AddPotionRef(ObjectReference PotionRef, Int PotionAmount)
 	endWhile
 endFunction
 
-function AddPotions(Form PotionBase, Int PotionAmount)
+; returns the number of potions added
+int function AddPotions(Form PotionBase, Int PotionAmount)
 	; Find an empty potion form and place the new potion there
-	While PotionAmount > 0
+	int addCount = 0
+	while PotionAmount > addCount
 		if PlacedPotion01 == EmptyForm
 			TRACE("POTIONS - PlacedPotion01 is empty, placing potion there")
 			PlacedPotion01 = PotionBase
-			PotionAmount = PotionAmount - 1
+			addCount += 1
 		elseif PlacedPotion02 == EmptyForm
 			TRACE("POTIONS - PlacedPotion02 is empty, placing potion there")
 			PlacedPotion02 = PotionBase
-			PotionAmount = PotionAmount - 1
+			addCount += 1
 		elseif PlacedPotion03 == EmptyForm
 			TRACE("POTIONS - PlacedPotion03 is empty, placing potion there")
 			PlacedPotion03 = PotionBase
-			PotionAmount = PotionAmount - 1
+			addCount += 1
 		elseif PlacedPotion04 == EmptyForm
 			TRACE("POTIONS - PlacedPotion04 is empty, placing potion there")
 			PlacedPotion04 = PotionBase
-			PotionAmount = PotionAmount - 1
+			addCount += 1
 		elseif PlacedPotion05 == EmptyForm
 			TRACE("POTIONS - PlacedPotion05 is empty, placing potion there")
 			PlacedPotion05 = PotionBase
-			PotionAmount = PotionAmount - 1
+			addCount += 1
 		elseif PlacedPotion06 == EmptyForm
 			TRACE("POTIONS - PlacedPotion06 is empty, placing potion there")
 			PlacedPotion06 = PotionBase
-			PotionAmount = PotionAmount - 1
+			addCount += 1
 		elseif PlacedPotion07 == EmptyForm
 			TRACE("POTIONS - PlacedPotion07 is empty, placing potion there")
 			PlacedPotion07 = PotionBase
-			PotionAmount = PotionAmount - 1
+			addCount += 1
 		elseif PlacedPotion08 == EmptyForm
 			TRACE("POTIONS - PlacedPotion08 is empty, placing potion there")
 			PlacedPotion08 = PotionBase
-			PotionAmount = PotionAmount - 1
+			addCount += 1
 		elseif PlacedPotion09 == EmptyForm
 			TRACE("POTIONS - PlacedPotion09 is empty, placing potion there")
 			PlacedPotion09 = PotionBase
-			PotionAmount = PotionAmount - 1
+			addCount += 1
 		elseif PlacedPotion10 == EmptyForm
 			TRACE("POTIONS - PlacedPotion10 is empty, placing potion there")
 			PlacedPotion10 = PotionBase
-			PotionAmount = PotionAmount - 1
+			addCount += 1
 		elseif PlacedPotion11 == EmptyForm
 			TRACE("POTIONS - PlacedPotion11 is empty, placing potion there")
 			PlacedPotion11 = PotionBase
-			PotionAmount = PotionAmount - 1
+			addCount += 1
 		elseif PlacedPotion12 == EmptyForm
 			TRACE("POTIONS - PlacedPotion12 is empty, placing potion there")
 			PlacedPotion12 = PotionBase
-			PotionAmount = PotionAmount - 1
+			addCount += 1
 		elseif PlacedPotion13 == EmptyForm
 			TRACE("POTIONS - PlacedPotion13 is empty, placing potion there")
 			PlacedPotion13 = PotionBase
-			PotionAmount = PotionAmount - 1
+			addCount += 1
 		elseif PlacedPotion14 == EmptyForm
 			TRACE("POTIONS - PlacedPotion14 is empty, placing potion there")
 			PlacedPotion14 = PotionBase
-			PotionAmount = PotionAmount - 1
+			addCount += 1
 		elseif PlacedPotion15 == EmptyForm
 			TRACE("POTIONS - PlacedPotion15 is empty, placing potion there")
 			PlacedPotion15 = PotionBase
-			PotionAmount = PotionAmount - 1
+			addCount += 1
 		elseif PlacedPotion16 == EmptyForm
 			TRACE("POTIONS - PlacedPotion16 is empty, placing potion there")
 			PlacedPotion16 = PotionBase
-			PotionAmount = PotionAmount - 1
+			addCount += 1
 		elseif PlacedPotion17 == EmptyForm
 			TRACE("POTIONS - PlacedPotion17 is empty, placing potion there")
 			PlacedPotion17 = PotionBase
-			PotionAmount = PotionAmount - 1
+			addCount += 1
 		elseif PlacedPotion18 == EmptyForm
 			TRACE("POTIONS - PlacedPotion18 is empty, placing potion there")
 			PlacedPotion18 = PotionBase
-			PotionAmount = PotionAmount - 1
+			addCount += 1
+		else
+			return addCount
 		endif
 	endWhile
+	return addCount
 endFunction
 
 

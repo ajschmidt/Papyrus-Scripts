@@ -165,7 +165,7 @@ endFunction
 
 Function AddBooks(Form BookBase, Int BookAmount)
         ;Debug.TraceAndBox("AddBooks, NumBooks: "+NumBooks)
-	While BookAmount > 0
+	while BookAmount > 0
 		if NumBooks < MaxBooks
 			PlacedBooks[NumBooks] = BookBase
 			NumBooks += 1

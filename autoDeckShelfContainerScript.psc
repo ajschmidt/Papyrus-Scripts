@@ -86,9 +86,6 @@ int NumBooks = 0
 ;Distance from first to last book
 float TotalDistance = 0.0
 
-;Amount of space already occupied on the shelf
-float UsedSpace = 0.0
-
 ;Fraction of total distance covered so far
 float TotalOffset = 0.0
 float xDist = 0.0
@@ -169,7 +166,6 @@ function UpdateBooks()
 	stackedIngots = 0
 	;Start updating book locations
 	int i=0
-        ;Debug.TraceAndBox("UpdateBooks "+self+", NumBooks: "+NumBooks+", shelfFull: "+shelfFull+", UsedSpace: "+UsedSpace+", TotalDistance: "+TotalDistance)
 	while i<NumBooks
 		if self.getItemCount(PlacedBooks[i]) == 0
 			debug.TraceAndBox("Alert: Book '"+PlacedBooks[i].getName()+"' not found in the containers inventory. It must have been removed.")
@@ -221,10 +217,10 @@ endFunction
 
 event OnItemRemoved(Form akBaseItem, int aiItemCount, ObjectReference akItemReference, ObjectReference akDestContainer)
 	if BlockBooks == FALSE
-        ;Debug.TraceAndBox("OnItemRemoved "+self+", NumBooks: "+NumBooks+", shelfFull: "+shelfFull+", UsedSpace: "+UsedSpace+", TotalDistance: "+TotalDistance+"Book Name: "+akItemReference.getName())
 		; if the player took the item then the shelf is no longer full
 		if akDestContainer != OverflowContainer
 			shelfFull = FALSE
+        Debug.TraceAndBox("OnItemRemoved "+self+", akDeskContainer != OverflowContainer")
 		endif
 		RemoveBooks(akBaseItem, aiItemCount)
 	else
@@ -425,10 +421,7 @@ bool function thereIsRoom(ObjectReference item, Form itemType)
 		
 
 	if (TotalOffset + itemWidth/TotalDistance) > (1.0 + (1.5 * MarkerHeight/TotalDistance))
-		if itemWidth < 14
-			shelfFull = TRUE
-		endif
-		
+		shelfFull = TRUE
 		return FALSE
 	else
 		return TRUE

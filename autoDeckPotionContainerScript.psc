@@ -3,9 +3,6 @@ Scriptname autoDeckPotionContainerScript extends autoDeckContainerBase
 import debug
 import utility
 
-Form Property LItemPotionClutter Auto
-{Clutter item list to fill the shelf with}
-
 Keyword Property BookShelfBook01 Auto
 Keyword Property BookShelfBook02 Auto
 Keyword Property BookShelfBook03 Auto
@@ -157,7 +154,6 @@ EVENT OnCellLoad()
 		PotionShelfTrigger04Ref = (GetLinkedRef(BookShelfTrigger04) as autoDeckShelfTriggerScript)
 		; Count how many potions can be placed on this shelf
 		CountMaxPotions()
-		Self.AddItem(LItemPotionClutter, MaxPotionsAllowed)
 		Wait(0.1)
 		PlacePotions()
 

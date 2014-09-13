@@ -165,7 +165,7 @@ function initPotionContainers()
 endFunction
 
 function initMixedContainers()
-	MixedContainers =  new autoDeckContainerBase[12]
+	MixedContainers =  new autoDeckContainerBase[22]
 	MixedContainers[0] = Mixed01
 	MixedContainers[1] = Mixed02
 	MixedContainers[2] = Mixed03
@@ -247,7 +247,7 @@ function initSkullContainers()
 endFunction
 
 function initJewelryContainers()
-	JewelryContainers =  new autoDeckContainerBase[6]
+	JewelryContainers =  new autoDeckContainerBase[4]
 	JewelryContainers[0] = Jewelry01
 	JewelryContainers[1] = Jewelry02
 	JewelryContainers[2] = Jewelry03

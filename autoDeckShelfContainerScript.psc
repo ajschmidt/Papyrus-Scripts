@@ -8,68 +8,13 @@ Form Property LItemBookClutter Auto
 
 ;***Stuff to make it compatible with the vanilla system***
 Keyword Property BookShelfBook01 Auto
-Keyword Property BookShelfBook02 Auto
-Keyword Property BookShelfBook03 Auto
-Keyword Property BookShelfBook04 Auto
-Keyword Property BookShelfBook05 Auto
-Keyword Property BookShelfBook06 Auto
-Keyword Property BookShelfBook07 Auto
-Keyword Property BookShelfBook08 Auto
-Keyword Property BookShelfBook09 Auto
-Keyword Property BookShelfBook10 Auto
-Keyword Property BookShelfBook11 Auto
-Keyword Property BookShelfBook12 Auto
-Keyword Property BookShelfBook13 Auto
-Keyword Property BookShelfBook14 Auto
-Keyword Property BookShelfBook15 Auto
-Keyword Property BookShelfBook16 Auto
-Keyword Property BookShelfBook17 Auto
 Keyword Property BookShelfBook18 Auto
 Keyword Property VendorItemGem Auto
 Keyword Property VendorItemOreIngot Auto
 Keyword Property VendorItemPotion Auto
 Keyword Property VendorItemPoison Auto
 Keyword Property VendorItemFood Auto
-{List of required Keywords}
-Form Property PlacedBook01 Auto Hidden
-Form Property PlacedBook02 Auto Hidden
-Form Property PlacedBook03 Auto Hidden
-Form Property PlacedBook04 Auto Hidden
-Form Property PlacedBook05 Auto Hidden
-Form Property PlacedBook06 Auto Hidden
-Form Property PlacedBook07 Auto Hidden
-Form Property PlacedBook08 Auto Hidden
-Form Property PlacedBook09 Auto Hidden
-Form Property PlacedBook10 Auto Hidden
-Form Property PlacedBook11 Auto Hidden
-Form Property PlacedBook12 Auto Hidden
-Form Property PlacedBook13 Auto Hidden
-Form Property PlacedBook14 Auto Hidden
-Form Property PlacedBook15 Auto Hidden
-Form Property PlacedBook17 Auto Hidden
-Form Property PlacedBook16 Auto Hidden
-Form Property PlacedBook18 Auto Hidden
-{List of Placed Book Forms}
-ObjectReference Property PlacedBook01Ref Auto Hidden
-ObjectReference Property PlacedBook02Ref Auto Hidden
-ObjectReference Property PlacedBook03Ref Auto Hidden
-ObjectReference Property PlacedBook04Ref Auto Hidden
-ObjectReference Property PlacedBook05Ref Auto Hidden
-ObjectReference Property PlacedBook06Ref Auto Hidden
-ObjectReference Property PlacedBook07Ref Auto Hidden
-ObjectReference Property PlacedBook08Ref Auto Hidden
-ObjectReference Property PlacedBook09Ref Auto Hidden
-ObjectReference Property PlacedBook10Ref Auto Hidden
-ObjectReference Property PlacedBook11Ref Auto Hidden
-ObjectReference Property PlacedBook12Ref Auto Hidden
-ObjectReference Property PlacedBook13Ref Auto Hidden
-ObjectReference Property PlacedBook14Ref Auto Hidden
-ObjectReference Property PlacedBook15Ref Auto Hidden
-ObjectReference Property PlacedBook17Ref Auto Hidden
-ObjectReference Property PlacedBook16Ref Auto Hidden
-ObjectReference Property PlacedBook18Ref Auto Hidden
 ObjectReference Property BookMarkerLate Auto Hidden
-{List of Placed Book Refs}
 
 Bool Property adAlreadyLoaded2 = FALSE Auto Hidden
 Bool Property adAlreadyLoaded8 = FALSE Auto Hidden
@@ -272,11 +217,10 @@ function load()
 		BookShelfTrigger02Ref = (GetLinkedRef(BookShelfTrigger02) as autoDeckShelfTriggerScript)
 		BookShelfTrigger03Ref = (GetLinkedRef(BookShelfTrigger03) as autoDeckShelfTriggerScript)
 		BookShelfTrigger04Ref = (GetLinkedRef(BookShelfTrigger04) as autoDeckShelfTriggerScript)
-		RecoverOldBooks()
+		;RecoverOldBooks()
 		adAlreadyLoaded2 = TRUE
 	endif
 	if !adAlreadyLoaded8
-		;Debug.TraceAndBox("CountMaxBooksA, Parent: "+parent+", Self: "+self)
 		BookMarkerStart = GetLinkedRef(BookShelfBook01)
 		BookMarkerEnd = GetLinkedRef(BookShelfBook18)
 
@@ -429,46 +373,6 @@ bool function thereIsRoom(ObjectReference item, Form itemType)
 endFunction
 
 Function CountMaxBooks()
-        ;Debug.TraceAndBox("CountMaxBooks2, BookMarkerEnd: "+BookMarkerEnd+", BookMarkerStart: "+BookMarkerStart)
-	; Checks how many books can be placed on this shelf
-	if GetLinkedRef(BookShelfBook18) 
-		BookMarkerEnd = GetLinkedRef(BookShelfBook18)
-        ;Debug.TraceAndBox("CountMaxBooks18, BookMarkerEnd: "+BookMarkerEnd+", BookMarkerStart: "+BookMarkerStart)
-	elseif GetLinkedRef(BookShelfBook17) 
-		BookMarkerEnd = GetLinkedRef(BookShelfBook17)
-	elseif GetLinkedRef(BookShelfBook16) 
-		BookMarkerEnd = GetLinkedRef(BookShelfBook16)
-	elseif GetLinkedRef(BookShelfBook15) 
-		BookMarkerEnd = GetLinkedRef(BookShelfBook15)
-	elseif GetLinkedRef(BookShelfBook14) 
-		BookMarkerEnd = GetLinkedRef(BookShelfBook14)
-	elseif GetLinkedRef(BookShelfBook13) 
-		BookMarkerEnd = GetLinkedRef(BookShelfBook13)
-	elseif GetLinkedRef(BookShelfBook12) 
-		BookMarkerEnd = GetLinkedRef(BookShelfBook12)
-	elseif GetLinkedRef(BookShelfBook11) 
-		BookMarkerEnd = GetLinkedRef(BookShelfBook11)
-	elseif GetLinkedRef(BookShelfBook10) 
-		BookMarkerEnd = GetLinkedRef(BookShelfBook10)
-	elseif GetLinkedRef(BookShelfBook09) 
-		BookMarkerEnd = GetLinkedRef(BookShelfBook09)
-	elseif GetLinkedRef(BookShelfBook08) 
-		BookMarkerEnd = GetLinkedRef(BookShelfBook08)
-	elseif GetLinkedRef(BookShelfBook07) 
-		BookMarkerEnd = GetLinkedRef(BookShelfBook07)
-	elseif GetLinkedRef(BookShelfBook06) 
-		BookMarkerEnd = GetLinkedRef(BookShelfBook06)
-	elseif GetLinkedRef(BookShelfBook05) 
-		BookMarkerEnd = GetLinkedRef(BookShelfBook05)
-	elseif GetLinkedRef(BookShelfBook04) 
-		BookMarkerEnd = GetLinkedRef(BookShelfBook04)
-	elseif GetLinkedRef(BookShelfBook03) 
-		BookMarkerEnd = GetLinkedRef(BookShelfBook03)
-	elseif GetLinkedRef(BookShelfBook02) 
-		BookMarkerEnd = GetLinkedRef(BookShelfBook02)
-	elseif GetLinkedRef(BookShelfBook01) 
-		BookMarkerEnd = GetLinkedRef(BookShelfBook01)
-	endif
 	xDist = BookMarkerEnd.getPositionX()-BookMarkerStart.getPositionX()
 	yDist = BookMarkerEnd.getPositionY()-BookMarkerStart.getPositionY()
 	zDist = BookMarkerEnd.getPositionZ()-BookMarkerStart.getPositionZ()
@@ -702,80 +606,6 @@ function CleanArrays()
 	NumBooks = loc
 endFunction
 
-function RecoverOldBooks()
-	PlacedBooks[0] = PlacedBook01
-	PlacedBooksRef[0] = PlacedBook01Ref
-	PlacedBook01 = None
-	PlacedBook01Ref = None
-	PlacedBooks[1] = PlacedBook02
-	PlacedBooksRef[1] = PlacedBook02Ref
-	PlacedBook02 = None
-	PlacedBook02Ref = None
-	PlacedBooks[2] = PlacedBook03
-	PlacedBooksRef[2] = PlacedBook03Ref
-	PlacedBook03 = None
-	PlacedBook03Ref = None
-	PlacedBooks[3] = PlacedBook04
-	PlacedBooksRef[3] = PlacedBook04Ref
-	PlacedBook04 = None
-	PlacedBook04Ref = None
-	PlacedBooks[4] = PlacedBook05
-	PlacedBooksRef[4] = PlacedBook05Ref
-	PlacedBook05 = None
-	PlacedBook05Ref = None
-	PlacedBooks[5] = PlacedBook06
-	PlacedBooksRef[5] = PlacedBook06Ref
-	PlacedBook06 = None
-	PlacedBook06Ref = None
-	PlacedBooks[6] = PlacedBook07
-	PlacedBooksRef[6] = PlacedBook07Ref
-	PlacedBook07 = None
-	PlacedBook07Ref = None
-	PlacedBooks[7] = PlacedBook08
-	PlacedBooksRef[7] = PlacedBook08Ref
-	PlacedBook08 = None
-	PlacedBook08Ref = None
-	PlacedBooks[8] = PlacedBook09
-	PlacedBooksRef[8] = PlacedBook09Ref
-	PlacedBook09 = None
-	PlacedBook09Ref = None
-	PlacedBooks[9] = PlacedBook10
-	PlacedBooksRef[9] = PlacedBook10Ref
-	PlacedBook10 = None
-	PlacedBook10Ref = None
-	PlacedBooks[10] = PlacedBook11
-	PlacedBooksRef[10] = PlacedBook11Ref
-	PlacedBook11 = None
-	PlacedBook11Ref = None
-	PlacedBooks[11] = PlacedBook12
-	PlacedBooksRef[11] = PlacedBook12Ref
-	PlacedBook12 = None
-	PlacedBook12Ref = None
-	PlacedBooks[12] = PlacedBook13
-	PlacedBooksRef[12] = PlacedBook13Ref
-	PlacedBook13 = None
-	PlacedBook13Ref = None
-	PlacedBooks[13] = PlacedBook14
-	PlacedBooksRef[13] = PlacedBook14Ref
-	PlacedBook14 = None
-	PlacedBook14Ref = None
-	PlacedBooks[14] = PlacedBook15
-	PlacedBooksRef[14] = PlacedBook15Ref
-	PlacedBook15 = None
-	PlacedBook15Ref = None
-	PlacedBooks[15] = PlacedBook16
-	PlacedBooksRef[15] = PlacedBook16Ref
-	PlacedBook16 = None
-	PlacedBook16Ref = None
-	PlacedBooks[16] = PlacedBook17
-	PlacedBooksRef[16] = PlacedBook17Ref
-	PlacedBook17 = None
-	PlacedBook17Ref = None
-	PlacedBooks[17] = PlacedBook18
-	PlacedBooksRef[17] = PlacedBook18Ref
-	PlacedBook18 = None
-	PlacedBook18Ref = None
-endFunction
 
 bool function isFull()
 	return shelfFull || containerFull

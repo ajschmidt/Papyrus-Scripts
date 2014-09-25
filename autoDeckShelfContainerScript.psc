@@ -165,7 +165,7 @@ event OnItemRemoved(Form akBaseItem, int aiItemCount, ObjectReference akItemRefe
 		; if the player took the item then the shelf is no longer full
 		if akDestContainer != OverflowContainer
 			shelfFull = FALSE
-        Debug.TraceAndBox("OnItemRemoved "+self+", akDeskContainer != OverflowContainer")
+        ;Debug.TraceAndBox("OnItemRemoved "+self+", akDeskContainer != OverflowContainer")
 		endif
 		RemoveBooks(akBaseItem, aiItemCount)
 	else

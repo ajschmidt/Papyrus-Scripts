@@ -117,6 +117,7 @@ Keyword Property VendorItemScroll  Auto
 Keyword Property VendorItemSoulGem  Auto 
 Keyword Property VendorItemSpellTome  Auto 
 Keyword Property VendorItemTool  Auto 
+Keyword Property VendorItemWeapon  Auto 
 
 int BookCounter = 0
 int AddCounter = 0
@@ -324,8 +325,10 @@ event OnActivate(ObjectReference akActionRef)
 	int end = inventoryRef.Find(None)
 	int totalCount = 0
 	end = 128
-
 	int index = 0
+	; Iterate through all of the form categories in the container's inventory 
+	; Iterate through blocks of < 128 items in each form category and send them 
+	; to the target containers based on their type
 	while index < end
 	;debug.TraceAndBox("OnActivate(), end = "+end)
 		nextForm = inventoryRef[index]
@@ -393,7 +396,9 @@ function placeItems(Form akActionRef, int itemCount, int rotation)
 
 	bool placed = false;
 
-	if (isIngot(akActionRef))
+	if (isBulky(akActionRef))
+		self.RemoveItem(akActionRef, itemCount, true, Game.GetPlayer())
+	elseif (isIngot(akActionRef))
 		placed = findOpeningAndPlace(IngotContainers, akActionRef, itemCount)
 	elseif (akActionRef.getName() == "Skull")
 		placed = findOpeningAndPlace(SkullContainers, akActionRef, itemCount)
@@ -439,9 +444,11 @@ endFunction
 bool function findOpeningAndPlace(autoDeckContainerBase[] containers, Form akActionRef, int itemCount)
 	int len = containers.length
 	int i=0
+        ; find the first container in the list that is not full
 	while i < len && (!containers[i] || containers[i].isFull())
 		i += 1
 	endWhile
+	; put itemCount  items in container that was found
 	if i < len
 		placeItem(containers[i], akActionRef, itemCount) 
 		return true
@@ -487,6 +494,22 @@ bool function isIngot(Form akActionRef)
 		return true
 	else
 		return false 
+	endif
+	
+endFunction
+
+bool function isBulky(Form akActionRef)
+
+	if akActionRef.HasKeyword(VendorItemWeapon) 
+		return true
+	elseif (akActionRef as Weapon)
+		return true
+	elseif (akActionRef as Armor)
+		Armor item = akActionRef as Armor
+		if (item.isClothing() || item.isBoots() || item.isHelmet() || item.isGauntlets() || item.isJewelry()) 
+			return false
+		else
+			return true
 	endif
 	
 endFunction
@@ -604,4 +627,12 @@ bool function containsInt(int find, int size, int[] ids)
 		i += 1
 	endWhile
 	return false
+endFunction
+
+event OnLockStateChanged()
+	runTest()
+endEvent
+
+function runTest()
+	debug.TraceAndBox("Test Complete")
 endFunction

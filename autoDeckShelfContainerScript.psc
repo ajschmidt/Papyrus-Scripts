@@ -113,7 +113,7 @@ function UpdateBooks()
 	int i=0
 	while i<NumBooks
 		if self.getItemCount(PlacedBooks[i]) == 0
-			debug.TraceAndBox("Alert: Book '"+PlacedBooks[i].getName()+"' not found in the containers inventory. It must have been removed.")
+			;debug.TraceAndBox("Alert: Book '"+PlacedBooks[i].getName()+"' not found in the containers inventory. It must have been removed.")
 			PlacedBooksRef[i] = PlacedBooksRef[NumBooks - 1]
 			PlacedBooks[i] = PlacedBooks[NumBooks - 1]
 			if i==NumBooks - 1

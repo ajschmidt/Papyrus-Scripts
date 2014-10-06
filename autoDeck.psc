@@ -398,6 +398,7 @@ function placeItems(Form akActionRef, int itemCount, int rotation)
 
 	if (isBulky(akActionRef))
 		self.RemoveItem(akActionRef, itemCount, true, Game.GetPlayer())
+		placed = true
 	elseif (isIngot(akActionRef))
 		placed = findOpeningAndPlace(IngotContainers, akActionRef, itemCount)
 	elseif (akActionRef.getName() == "Skull")
@@ -504,13 +505,18 @@ bool function isBulky(Form akActionRef)
 		return true
 	elseif (akActionRef as Weapon)
 		return true
+	elseif (akActionRef as Ammo)
+		return true
 	elseif (akActionRef as Armor)
 		Armor item = akActionRef as Armor
 		if (item.isClothing() || item.isBoots() || item.isHelmet() || item.isGauntlets() || item.isJewelry()) 
 			return false
 		else
 			return true
+		endif
 	endif
+
+	return false
 	
 endFunction
 

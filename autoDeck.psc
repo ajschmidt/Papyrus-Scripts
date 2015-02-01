@@ -57,6 +57,7 @@ autoDeckContainerBase[] JewelryContainers =  None
 
 autoDeckContainerBase Property Dishes01  Auto  
 autoDeckContainerBase Property Dishes02  Auto  
+autoDeckContainerBase[] DishContainers =  None
 
 autoDeckContainerBase Property Skulls01  Auto  
 autoDeckContainerBase Property Skulls02  Auto  
@@ -141,8 +142,7 @@ event OnCellLoad()
 	initSoulGemContainers()
 	initJewelryContainers()
 	initScrollContainers()
-	Dishes01.OverflowContainer = OverflowContainer
-	Dishes02.OverflowContainer = OverflowContainer
+	initDishContainers()
 	initSkullContainers()
 	initTallContainers()
 	initTrollSkullContainers()
@@ -223,6 +223,13 @@ function initGemContainers()
 	GemContainers[1] = Gems02
 	GemContainers[2] = Gems03
 	setOverflowContainer(GemContainers)
+endFunction
+
+function initDishContainers()
+	DishContainers =  new autoDeckContainerBase[2]
+	DishContainers[0] = Dishes01
+	DishContainers[1] = Dishes02
+	setOverflowContainer(DishContainers)
 endFunction
 
 function initSoulGemContainers()
@@ -424,6 +431,8 @@ function placeItems(Form akActionRef, int itemCount, int rotation)
 		endif
 	elseif (isBook(akActionRef))
 		placed = findOpeningAndPlace(BookContainers, akActionRef, itemCount)
+	elseif (isDish(akActionRef))
+		placed = findOpeningAndPlace(DishContainers, akActionRef, itemCount)
 	elseif (isTall(akActionRef))
 		placed = findOpeningAndPlace(TallContainers, akActionRef, itemCount)
 	endif
@@ -557,6 +566,33 @@ bool function isScroll(Form akActionRef)
 		return (akActionRef as Scroll)
 	endif
 	
+endFunction
+
+bool function isDish(Form akActionRef)
+debug.trace("isDish() Name: "+akActionRef.getName()+", FormID: "+akActionRef.getFormID())
+	int[] formIds = new int[8]
+	int i = 0
+        formIds[i] = 927255
+	i += 1
+        formIds[i] = 927256
+	i += 1
+        formIds[i] = 128724
+	i += 1
+        formIds[i] = 760784
+	i += 1
+        formIds[i] = 985333
+	i += 1
+        formIds[i] = 958980
+	i += 1
+        formIds[i] = 624164
+	i += 1
+        formIds[i] = 958979
+	
+	if (containsInt(akActionRef.getFormID(), 8, formIds))
+		return true
+	else
+		return false
+	endif
 endFunction
 
 bool function isTall(Form akActionRef)

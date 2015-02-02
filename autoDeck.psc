@@ -99,6 +99,12 @@ autoDeckContainerBase Property Mixed19  Auto
 autoDeckContainerBase Property Mixed20  Auto  
 autoDeckContainerBase Property Mixed21  Auto  
 autoDeckContainerBase Property Mixed22  Auto  
+autoDeckContainerBase Property Mixed23  Auto  
+autoDeckContainerBase Property Mixed24  Auto  
+autoDeckContainerBase Property Mixed25  Auto  
+autoDeckContainerBase Property Mixed26  Auto  
+autoDeckContainerBase Property Mixed27  Auto  
+autoDeckContainerBase Property Mixed28  Auto  
 autoDeckContainerBase[] MixedContainers =  None
 
 ObjectReference Property OverflowContainer Auto
@@ -166,7 +172,7 @@ function initPotionContainers()
 endFunction
 
 function initMixedContainers()
-	MixedContainers =  new autoDeckContainerBase[22]
+	MixedContainers =  new autoDeckContainerBase[28]
 	MixedContainers[0] = Mixed01
 	MixedContainers[1] = Mixed02
 	MixedContainers[2] = Mixed03
@@ -189,6 +195,12 @@ function initMixedContainers()
 	MixedContainers[19] = Mixed20
 	MixedContainers[20] = Mixed21
 	MixedContainers[21] = Mixed22
+	MixedContainers[22] = Mixed23
+	MixedContainers[23] = Mixed24
+	MixedContainers[24] = Mixed25
+	MixedContainers[25] = Mixed26
+	MixedContainers[26] = Mixed27
+	MixedContainers[27] = Mixed28
 	setOverflowContainer(MixedContainers)
 endFunction
 
@@ -311,13 +323,14 @@ endEvent
 
 event OnItemRemoved(Form itemBase, int itemCount, ObjectReference itemRef, ObjectReference targetContainer)
 	TotalItems -= itemCount
-	int i = self.GetItemCount(itemBase) 
-	if i < 1 
-		int loc = inventoryRef.Find(itemBase) 
-		if loc >= 0
-			inventoryRef[loc] = None
-		endif
-	endif
+	; by commenting this out I'm creating a potential bug if more than 128 Form types get added
+	;int i = self.GetItemCount(itemBase) 
+	;if i < 1 
+		;int loc = inventoryRef.Find(itemBase) 
+		;if loc >= 0
+			;inventoryRef[loc] = None
+		;endif
+	;endif
 			
 endEvent
 
@@ -329,9 +342,9 @@ event OnActivate(ObjectReference akActionRef)
 	bool again = false
 	int itemCount = 0
 	Form nextForm = None
-	int end = inventoryRef.Find(None)
+	;int end = inventoryRef.Find(None)
 	int totalCount = 0
-	end = 128
+	int end = 128
 	int index = 0
 	; Iterate through all of the form categories in the container's inventory 
 	; Iterate through blocks of < 128 items in each form category and send them 
@@ -361,6 +374,7 @@ event OnActivate(ObjectReference akActionRef)
 			again = TRUE
 		endif
 	
+                ; I don't need to remove the items form the inventory because the 'OnItemRemoved' event will do that
 		;inventoryRef[index] = None
 		index += 1
 	endWhile

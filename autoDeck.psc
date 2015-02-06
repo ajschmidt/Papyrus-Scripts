@@ -106,6 +106,7 @@ autoDeckContainerBase Property Mixed26  Auto
 autoDeckContainerBase Property Mixed27  Auto  
 autoDeckContainerBase Property Mixed28  Auto  
 autoDeckContainerBase[] MixedContainers =  None
+autoDeckContainerBase[] SpillOverContainers =  None
 
 ObjectReference Property OverflowContainer Auto
 
@@ -173,6 +174,7 @@ endFunction
 
 function initMixedContainers()
 	MixedContainers =  new autoDeckContainerBase[28]
+	SpillOverContainers =  new autoDeckContainerBase[1]
 	MixedContainers[0] = Mixed01
 	MixedContainers[1] = Mixed02
 	MixedContainers[2] = Mixed03
@@ -201,7 +203,8 @@ function initMixedContainers()
 	MixedContainers[25] = Mixed26
 	MixedContainers[26] = Mixed27
 	MixedContainers[27] = Mixed28
-	setOverflowContainer(MixedContainers)
+	MixedContainers[27] = Mixed28
+	SpillOverContainers[0] = Mixed28
 endFunction
 
 function initIngotContainers()
@@ -418,8 +421,9 @@ function placeItems(Form akActionRef, int itemCount, int rotation)
 	bool placed = false;
 
 	if (isBulky(akActionRef))
-		self.RemoveItem(akActionRef, itemCount, true, Game.GetPlayer())
-		placed = true
+		;self.RemoveItem(akActionRef, itemCount, true, Game.GetPlayer())
+		;placed = true
+		placed = findOpeningAndPlace(SpillOverContainers, akActionRef, itemCount)
 	elseif (isIngot(akActionRef))
 		placed = findOpeningAndPlace(IngotContainers, akActionRef, itemCount)
 	elseif (akActionRef.getName() == "Skull")

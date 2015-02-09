@@ -127,6 +127,15 @@ Keyword Property VendorItemSpellTome  Auto
 Keyword Property VendorItemTool  Auto 
 Keyword Property VendorItemWeapon  Auto 
 
+Message Property AutoDeckFirstActivateMESSAGE Auto
+{Display message when the player activates a bookshelf for the first time.  Only displays once.}
+
+Message Property AutoDeckNoMoreRoomMESSAGE Auto
+{Displayed message for when the amount of books the player is placing excedes the shelf limit.}
+
+GlobalVariable Property AutoDeckGlobal Auto
+{Global showing whether or not the player has ever activated a bookshelf}
+
 int BookCounter = 0
 int AddCounter = 0
 int MaxItems = 640
@@ -136,6 +145,8 @@ Form[] inventoryRef = None
 autoDeckContainerBase[] refreshList = None
 
 event OnCellLoad()
+
+GlobalVariable Property AutoDeckGlobal Auto
 	OverflowContainer = self
 	BookCounter = 0
 	AddCounter = 0
@@ -203,12 +214,14 @@ function initMixedContainers()
 	MixedContainers[25] = Mixed26
 	MixedContainers[26] = Mixed27
 	MixedContainers[27] = Mixed28
-	MixedContainers[27] = Mixed28
 	SpillOverContainers[0] = Mixed28
+	setOverflowContainer(MixedContainers)
+	setOverflowContainer(SpillOverContainers)
 endFunction
 
 function initIngotContainers()
 	IngotContainers =  new autoDeckContainerBase[12]
+	Ingots01.setDisplayName("Ingot Stack", true)
 	IngotContainers[0] = Ingots01
 	IngotContainers[1] = Ingots02
 	IngotContainers[2] = Ingots03
@@ -339,6 +352,10 @@ endEvent
 
 event OnActivate(ObjectReference akActionRef)
 	;debug.TraceAndBox("OnActivate(), formCounter = "+formCounter)
+	if (AutoDeckGlobal.GetValue() == 0)
+		AutoDeckFirstActivateMESSAGE.Show()
+		AutoDeckGlobal.SetValue(1)
+	endif
 	self.BlockActivation(true)
 	refreshList = new autoDeckContainerBase[128]
 	Wait(0.25)
@@ -421,8 +438,6 @@ function placeItems(Form akActionRef, int itemCount, int rotation)
 	bool placed = false;
 
 	if (isBulky(akActionRef))
-		;self.RemoveItem(akActionRef, itemCount, true, Game.GetPlayer())
-		;placed = true
 		placed = findOpeningAndPlace(SpillOverContainers, akActionRef, itemCount)
 	elseif (isIngot(akActionRef))
 		placed = findOpeningAndPlace(IngotContainers, akActionRef, itemCount)
@@ -441,14 +456,15 @@ function placeItems(Form akActionRef, int itemCount, int rotation)
 	elseif (isPotion(akActionRef))
 		placed = findOpeningAndPlace(PotionContainers, akActionRef, itemCount)
 	elseif(isSpellBook(akActionRef))
-		placed = true
-		if (Books03 && !Books03.isFull())
-			placeItem(Books03, akActionRef, itemCount) 
-		else
-			placed = false
-		endif
-	elseif (isBook(akActionRef))
 		placed = findOpeningAndPlace(BookContainers, akActionRef, itemCount)
+		;placed = true
+		;if (Books03 && !Books03.isFull())
+			;placeItem(Books03, akActionRef, itemCount) 
+		;else
+			;placed = false
+		;endif
+	;elseif (isBook(akActionRef))
+		;placed = findOpeningAndPlace(BookContainers, akActionRef, itemCount)
 	elseif (isDish(akActionRef))
 		placed = findOpeningAndPlace(DishContainers, akActionRef, itemCount)
 	elseif (isTall(akActionRef))
@@ -536,7 +552,7 @@ bool function isBulky(Form akActionRef)
 		return true
 	elseif (akActionRef as Armor)
 		Armor item = akActionRef as Armor
-		if (item.isClothing() || item.isBoots() || item.isHelmet() || item.isGauntlets() || item.isJewelry()) 
+		if ( item.isBoots() || item.isHelmet() || item.isGauntlets() || item.isJewelry()) 
 			return false
 		else
 			return true

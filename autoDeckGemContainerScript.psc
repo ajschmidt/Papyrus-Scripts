@@ -8,6 +8,14 @@ Form Property PlacedBook01 Auto Hidden
 ObjectReference Property PlacedBook01Ref Auto Hidden
 Bool Property adAlreadyLoaded2 = FALSE Auto Hidden
 Bool Property adAlreadyLoaded8 = FALSE Auto Hidden
+Message Property GemPileFirstMessage Auto
+{Display message when the player activates a bookshelf for the first time.  Only displays once.}
+
+Message Property GemPileNoMoreRoomMESSAGE Auto
+{Displayed message for when the amount of books the player is placing excedes the shelf limit.}
+
+GlobalVariable Property adGemPileGlobal Auto
+{Global showing whether or not the player has ever activated a bookshelf}
 
 int Property MaxBooks = 128 Auto
 

@@ -27,7 +27,6 @@ Form[] Property PlacedBooks Auto Hidden
 ObjectReference[] Property PlacedBooksRef Auto Hidden
 {List of Placed Book Refs}
 
-
 Bool Property BlockBooks = FALSE Auto Hidden
 {Used for when you can't place any more books}
 

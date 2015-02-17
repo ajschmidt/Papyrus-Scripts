@@ -57,7 +57,12 @@ autoDeckContainerBase[] JewelryContainers =  None
 
 autoDeckContainerBase Property Dishes01  Auto  
 autoDeckContainerBase Property Dishes02  Auto  
+autoDeckContainerBase Property Dishes03  Auto  
+autoDeckContainerBase Property Dishes04  Auto  
 autoDeckContainerBase[] DishContainers =  None
+
+autoDeckContainerBase Property Keys01  Auto  
+autoDeckContainerBase[] KeyContainers =  None
 
 autoDeckContainerBase Property Skulls01  Auto  
 autoDeckContainerBase Property Skulls02  Auto  
@@ -126,6 +131,7 @@ Keyword Property VendorItemSoulGem  Auto
 Keyword Property VendorItemSpellTome  Auto 
 Keyword Property VendorItemTool  Auto 
 Keyword Property VendorItemWeapon  Auto 
+Keyword Property VendorItemKey  Auto 
 
 Message Property AutoDeckFirstActivateMESSAGE Auto
 {Display message when the player activates a bookshelf for the first time.  Only displays once.}
@@ -140,13 +146,15 @@ int BookCounter = 0
 int AddCounter = 0
 int MaxItems = 640
 int TotalItems = 0
+int[] TallFormIds = None
+int[] DishIds = None
+int[] BulkyIds = None
 
 Form[] inventoryRef = None
 autoDeckContainerBase[] refreshList = None
 
 event OnCellLoad()
-
-GlobalVariable Property AutoDeckGlobal Auto
+	AutoDeckGlobal.SetValue(0)
 	OverflowContainer = self
 	BookCounter = 0
 	AddCounter = 0
@@ -161,8 +169,12 @@ GlobalVariable Property AutoDeckGlobal Auto
 	initJewelryContainers()
 	initScrollContainers()
 	initDishContainers()
+	initKeyContainers()
 	initSkullContainers()
 	initTallContainers()
+	initTallForms()
+	initDishIds()
+	initBulkyIds()
 	initTrollSkullContainers()
 endEvent
 
@@ -221,7 +233,7 @@ endFunction
 
 function initIngotContainers()
 	IngotContainers =  new autoDeckContainerBase[12]
-	Ingots01.setDisplayName("Ingot Stack", true)
+	;Ingots01.setDisplayName("Ingot Stack", true)
 	IngotContainers[0] = Ingots01
 	IngotContainers[1] = Ingots02
 	IngotContainers[2] = Ingots03
@@ -254,10 +266,18 @@ function initGemContainers()
 endFunction
 
 function initDishContainers()
-	DishContainers =  new autoDeckContainerBase[2]
+	DishContainers =  new autoDeckContainerBase[4]
 	DishContainers[0] = Dishes01
 	DishContainers[1] = Dishes02
+	DishContainers[2] = Dishes03
+	DishContainers[3] = Dishes04
 	setOverflowContainer(DishContainers)
+endFunction
+
+function initKeyContainers()
+	KeyContainers =  new autoDeckContainerBase[1]
+	KeyContainers[0] = Keys01
+	setOverflowContainer(KeyContainers)
 endFunction
 
 function initSoulGemContainers()
@@ -310,6 +330,92 @@ function initTallContainers()
 	setOverflowContainer(TallContainers)
 endFunction
 
+function initTallForms()
+	TallFormIds = new int[28]
+	int i = 0
+        TallFormIds[i] = 985329
+	i += 1
+        TallFormIds[i] = 549676
+	i += 1
+        TallFormIds[i] = 760798
+	i += 1
+        TallFormIds[i] = 760790
+	i += 1
+        TallFormIds[i] = 624163
+	i += 1
+        TallFormIds[i] = 985335
+	i += 1
+        TallFormIds[i] = 985334
+	i += 1
+        TallFormIds[i] = 77798
+	i += 1
+        TallFormIds[i] = 154878
+	i += 1
+        TallFormIds[i] = 760788
+	i += 1
+        TallFormIds[i] = 760786
+	i += 1
+        TallFormIds[i] = 1100906
+	i += 1
+        TallFormIds[i] = 895915
+	i += 1
+        TallFormIds[i] = 549434
+	i += 1
+        TallFormIds[i] = 155004
+	i += 1
+        TallFormIds[i] = 703792
+	i += 1
+        TallFormIds[i] = 104788
+	i += 1
+        TallFormIds[i] = 282222
+	i += 1
+        TallFormIds[i] = 588183
+	i += 1
+        TallFormIds[i] = 444911
+	i += 1
+        TallFormIds[i] = 405338
+	i += 1
+        TallFormIds[i] = 138915
+	i += 1
+        TallFormIds[i] = 114197
+	i += 1
+        TallFormIds[i] = 77804
+	i += 1
+        TallFormIds[i] = 77803
+	i += 1
+        TallFormIds[i] = 77802
+	i += 1
+        TallFormIds[i] = 77801
+	i += 1
+        TallFormIds[i] = 77800
+endFunction
+
+function initDishIds()
+	DishIds = new int[8]
+	int i = 0
+        DishIds[i] = 927255
+	i += 1
+        DishIds[i] = 927256
+	i += 1
+        DishIds[i] = 128724
+	i += 1
+        DishIds[i] = 760784
+	i += 1
+        DishIds[i] = 985333
+	i += 1
+        DishIds[i] = 958980
+	i += 1
+        DishIds[i] = 624164
+	i += 1
+        DishIds[i] = 958979
+endFunction
+
+function initBulkyIds()
+	BulkyIds = new int[1]
+	int i = 0
+        BulkyIds[i] = 624165
+endFunction
+
 function setOverflowContainer(autoDeckContainerBase[] containers)
 	int index = containers.length - 1
 	while index >= 0
@@ -324,8 +430,7 @@ event OnItemAdded(Form itemBase, int itemCount, ObjectReference itemRef, ObjectR
 	TotalItems += itemCount
 	int diff = TotalItems - MaxItems
 	if diff > 0
-		Notification("Add more after the AutoDeck is finished.")
-		Notification("You can only place a maximum of "+MaxItems+" items at once.")
+		AutoDeckNoMoreRoomMESSAGE.show()
 		RemoveItem(itemBase, diff, false, Game.getPlayer())
 		itemCount -= diff
 	endif
@@ -463,10 +568,12 @@ function placeItems(Form akActionRef, int itemCount, int rotation)
 		;else
 			;placed = false
 		;endif
-	;elseif (isBook(akActionRef))
-		;placed = findOpeningAndPlace(BookContainers, akActionRef, itemCount)
+	elseif (isBook(akActionRef))
+		placed = findOpeningAndPlace(BookContainers, akActionRef, itemCount)
 	elseif (isDish(akActionRef))
 		placed = findOpeningAndPlace(DishContainers, akActionRef, itemCount)
+	elseif (isKey(akActionRef))
+		placed = findOpeningAndPlace(KeyContainers, akActionRef, itemCount)
 	elseif (isTall(akActionRef))
 		placed = findOpeningAndPlace(TallContainers, akActionRef, itemCount)
 	endif
@@ -550,6 +657,10 @@ bool function isBulky(Form akActionRef)
 		return true
 	elseif (akActionRef as Ammo)
 		return true
+	elseif (akActionRef.HasKeyword(VendorItemAnimalHide))
+		return true
+	elseif (containsInt(akActionRef.getFormID(), 1, BulkyIds))
+		return true
 	elseif (akActionRef as Armor)
 		Armor item = akActionRef as Armor
 		if ( item.isBoots() || item.isHelmet() || item.isGauntlets() || item.isJewelry()) 
@@ -602,27 +713,20 @@ bool function isScroll(Form akActionRef)
 	
 endFunction
 
+bool function isKey(Form akActionRef)
+
+	if (akActionRef.HasKeyword(VendorItemKey))
+		return true
+	else
+		return (akActionRef as Key)
+	endif
+	
+endFunction
+
 bool function isDish(Form akActionRef)
 debug.trace("isDish() Name: "+akActionRef.getName()+", FormID: "+akActionRef.getFormID())
-	int[] formIds = new int[8]
-	int i = 0
-        formIds[i] = 927255
-	i += 1
-        formIds[i] = 927256
-	i += 1
-        formIds[i] = 128724
-	i += 1
-        formIds[i] = 760784
-	i += 1
-        formIds[i] = 985333
-	i += 1
-        formIds[i] = 958980
-	i += 1
-        formIds[i] = 624164
-	i += 1
-        formIds[i] = 958979
 	
-	if (containsInt(akActionRef.getFormID(), 8, formIds))
+	if (containsInt(akActionRef.getFormID(), 8, DishIds))
 		return true
 	else
 		return false
@@ -631,63 +735,8 @@ endFunction
 
 bool function isTall(Form akActionRef)
 debug.trace("isTall() Name: "+akActionRef.getName()+", FormID: "+akActionRef.getFormID())
-	int[] formIds = new int[27]
-	int i = 0
-        formIds[i] = 985329
-	i += 1
-        formIds[i] = 549676
-	i += 1
-        formIds[i] = 760798
-	i += 1
-        formIds[i] = 760790
-	i += 1
-        formIds[i] = 624163
-	i += 1
-        formIds[i] = 985335
-	i += 1
-        formIds[i] = 985334
-	i += 1
-        formIds[i] = 154878
-	i += 1
-        formIds[i] = 760788
-	i += 1
-        formIds[i] = 760786
-	i += 1
-        formIds[i] = 1100906
-	i += 1
-        formIds[i] = 895915
-	i += 1
-        formIds[i] = 549434
-	i += 1
-        formIds[i] = 155004
-	i += 1
-        formIds[i] = 703792
-	i += 1
-        formIds[i] = 104788
-	i += 1
-        formIds[i] = 282222
-	i += 1
-        formIds[i] = 588183
-	i += 1
-        formIds[i] = 444911
-	i += 1
-        formIds[i] = 405338
-	i += 1
-        formIds[i] = 138915
-	i += 1
-        formIds[i] = 114197
-	i += 1
-        formIds[i] = 77804
-	i += 1
-        formIds[i] = 77803
-	i += 1
-        formIds[i] = 77802
-	i += 1
-        formIds[i] = 77801
-	i += 1
-        formIds[i] = 77800
 	
-	if (containsInt(akActionRef.getFormID(), 27, formIds))
+	if (containsInt(akActionRef.getFormID(), 28, TallFormIds))
 		return true
 	else
 		return false

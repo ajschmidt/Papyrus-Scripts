@@ -126,7 +126,6 @@ Function load()
 		adAlreadyLoaded8 = true
 	endif
 
-	MaxBooks = PlacedBooks.length
 	self.blockActivation(false)
 	CleanArrays()
 	adAlreadyLoaded = false

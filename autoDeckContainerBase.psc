@@ -12,6 +12,7 @@ Keyword Property BookShelfTrigger01 Auto
 Keyword Property BookShelfTrigger02 Auto
 Keyword Property BookShelfTrigger03 Auto
 Keyword Property BookShelfTrigger04 Auto
+
 ObjectReference Property BookShelfTrigger01Ref Auto Hidden
 ObjectReference Property BookShelfTrigger02Ref Auto Hidden
 ObjectReference Property BookShelfTrigger03Ref Auto Hidden

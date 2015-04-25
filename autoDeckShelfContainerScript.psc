@@ -99,7 +99,6 @@ function refresh(ObjectReference akActionRef)
 		BookShelfTrigger04Ref.GoToState("WaitForBooks")
 	endif
 	self.blockActivation(false)
-	CurrentBookAmount = NumBooks
 endFunction
 
 function UpdateBooks()
@@ -156,7 +155,6 @@ function UpdateBooks()
 		endif
 		i+=1
 	endwhile
-	CurrentBookAmount = NumBooks
 	GoToState("") ; Now allow books to be updated again
 endFunction
 
@@ -171,7 +169,6 @@ event OnItemRemoved(Form akBaseItem, int aiItemCount, ObjectReference akItemRefe
 	else
 		BlockBooks = FALSE
 	endif
-	CurrentBookAmount = NumBooks
         
 endEvent
 
@@ -202,7 +199,6 @@ function itemAdded(Form akBaseItem, int aiItemCount, ObjectReference akItemRefer
 		self.RemoveItem(akBaseItem, aiItemDiff, true, OverflowContainer)
 	endif
 
-	CurrentBookAmount = NumBooks
 	self.BlockActivation(false)
 
 endFunction
@@ -285,7 +281,6 @@ Function RemoveBooks(Form BookBase, Int BookAmount)
 	if NumBooks < MaxBooks
 		containerFull = FALSE
 	endif	
-	CurrentBookAmount = NumBooks
 endFunction
 
 float Function getBookAmount(ObjectReference BookRef, int orient = 0)
@@ -342,7 +337,6 @@ function AddBooks(ObjectReference item, Form BookBase, Int BookAmount)
 		endif
 		BookAmount -= 1
 	endWhile
-	CurrentBookAmount = NumBooks
 endFunction
 
 bool function thereIsRoom(ObjectReference item, Form itemType)
@@ -473,10 +467,11 @@ ObjectReference function positionBook(Form bookType, int index)
 	if (TotalOffset + bookAmt/TotalDistance) > (1.0 + (1.5 * MarkerHeight/TotalDistance))
 		retVal.disable()
 		retVal.delete()
+		int itemCount = NumBooks
 		while NumBooks>index
-			self.RemoveItem(PlacedBooks[ NumBooks - 1 ], 1, true, OverflowContainer)
-			PlacedBooks[ NumBooks - 1 ] = None
-			NumBooks -= 1
+			self.RemoveItem(PlacedBooks[ itemCount - 1 ], 1, true, OverflowContainer)
+			;PlacedBooks[ NumBooks - 1 ] = None
+			itemCount -= 1
 		endwhile
 		shelfFull = TRUE
 		return None

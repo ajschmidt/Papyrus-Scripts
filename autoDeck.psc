@@ -196,39 +196,39 @@ function initPotionContainers()
 endFunction
 
 function initMixedContainers()
-	MixedContainers =  new autoDeckContainerBase[28]
+	MixedContainers =  new autoDeckContainerBase[56]
 	SpillOverContainers =  new autoDeckContainerBase[1]
 	MixedContainers[0] = Mixed01
-	MixedContainers[1] = Mixed02
-	MixedContainers[2] = Mixed03
-	MixedContainers[3] = Mixed04
-	MixedContainers[4] = Mixed05
-	MixedContainers[5] = Mixed06
-	MixedContainers[6] = Mixed07
-	MixedContainers[7] = Mixed08
-	MixedContainers[8] = Mixed09
-	MixedContainers[9] = Mixed10
-	MixedContainers[10] = Mixed11
-	MixedContainers[11] = Mixed12
-	MixedContainers[12] = Mixed13
-	MixedContainers[13] = Mixed14
-	MixedContainers[14] = Mixed15
-	MixedContainers[15] = Mixed16
-	MixedContainers[16] = Mixed17
-	MixedContainers[17] = Mixed18
-	MixedContainers[18] = Mixed19
-	MixedContainers[19] = Mixed20
-	MixedContainers[20] = Mixed21
-	MixedContainers[21] = Mixed22
-	MixedContainers[22] = Mixed23
-	MixedContainers[23] = Mixed24
-	MixedContainers[24] = Mixed25
-	MixedContainers[25] = Mixed26
-	MixedContainers[26] = Mixed27
-	MixedContainers[27] = Mixed28
+	MixedContainers[2] = Mixed02
+	MixedContainers[4] = Mixed03
+	MixedContainers[6] = Mixed04
+	MixedContainers[8] = Mixed05
+	MixedContainers[10] = Mixed06
+	MixedContainers[12] = Mixed07
+	MixedContainers[14] = Mixed08
+	MixedContainers[16] = Mixed09
+	MixedContainers[18] = Mixed10
+	MixedContainers[20] = Mixed11
+	MixedContainers[22] = Mixed12
+	MixedContainers[24] = Mixed13
+	MixedContainers[26] = Mixed14
+	MixedContainers[28] = Mixed15
+	MixedContainers[30] = Mixed16
+	MixedContainers[32] = Mixed17
+	MixedContainers[34] = Mixed18
+	MixedContainers[36] = Mixed19
+	MixedContainers[38] = Mixed20
+	MixedContainers[40] = Mixed21
+	MixedContainers[42] = Mixed22
+	MixedContainers[44] = Mixed23
+	MixedContainers[46] = Mixed24
+	MixedContainers[48] = Mixed25
+	MixedContainers[50] = Mixed26
+	MixedContainers[52] = Mixed27
+	MixedContainers[54] = Mixed28
 	SpillOverContainers[0] = Mixed28
 	setOverflowContainer(MixedContainers)
-	setOverflowContainer(SpillOverContainers)
+	;setOverflowContainer(SpillOverContainers)
 endFunction
 
 function initIngotContainers()
@@ -491,7 +491,7 @@ event OnActivate(ObjectReference akActionRef)
 					blockCount = itemCount
 				endif
 
-				placeItems(nextForm, blockCount, totalCount % 4)
+				placeItems(nextForm, blockCount, totalCount)
 				itemCount -= blockCount
 				totalCount += blockCount
 			endwhile
@@ -499,12 +499,13 @@ event OnActivate(ObjectReference akActionRef)
 			again = TRUE
 		endif
 	
-                ; I don't need to remove the items form the inventory because the 'OnItemRemoved' event will do that
-		;inventoryRef[index] = None
+                ; we need to remove the items form the inventory because the 'OnItemRemoved' 
+                ; event will not do that
+		inventoryRef[index] = None
 		index += 1
 	endWhile
 
-	Wait(2)
+	Wait(3)
 	end = 128
 	index = 0
 	ObjectReference adContainer = None
@@ -514,14 +515,14 @@ event OnActivate(ObjectReference akActionRef)
 
 		if adContainer != None
 			adContainer.Activate(self)
-			Wait(05)
+			;Wait(05)
 		endif
 		index += 1
 	endWhile
 	
 	self.BlockActivation(false)
 	if again 
-		Wait(02)
+		Wait(5)
 		self.Activate(self)
 	endif
 endEvent

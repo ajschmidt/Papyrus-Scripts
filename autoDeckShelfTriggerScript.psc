@@ -1,12 +1,10 @@
 Scriptname autoDeckShelfTriggerScript extends ObjectReference  
-{Trigger for autoDeck shelves which makes sure items get removed from the container if they fall off the shelf.}
 
 import debug
 import utility
 
-ObjectReference Property ShelfContainer auto hidden
-
-Bool Property AlreadyLoaded = FALSE Auto Hidden
+ObjectReference Property ShelfContainer Auto 
+Bool Property AlreadyLoaded = FALSE Auto 
 
 
 EVENT OnCellLoad()
@@ -39,7 +37,7 @@ auto STATE WaitForBooks
 				; Player isnt' grabbing this reference, check to see if it's in the container.
 				if Shelfcontainer.GetItemCount(TriggerRef.GetBaseObject()) >= 1
 					;debug.TraceAndBox("In Trigger Script; Item Removed: "+TriggerRef.GetName())
-					Shelfcontainer.RemoveItem(TriggerRef.GetBaseObject(), 1)
+					;Shelfcontainer.RemoveItem(TriggerRef.GetBaseObject(), 1)
 					;(Shelfcontainer as autoDeckContainerBase).CurrentBookAmount = (Shelfcontainer as autoDeckContainerBase).CurrentBookAmount - 1
 					;(ShelfContainer as autoDeckContainerBase).RemoveBooks((TriggerRef.GetBaseObject()), 1)
 				else
@@ -50,7 +48,6 @@ auto STATE WaitForBooks
 		endif
 	endEvent
 
-
 endSTATE
 
 
@@ -59,8 +56,3 @@ STATE IgnoreBooks
 		;Trace(self + " BOOKTRIGGER - Ignoring Books!")
 	endEVENT
 endSTATE
-
-
-
-int Property testint  Auto  
-

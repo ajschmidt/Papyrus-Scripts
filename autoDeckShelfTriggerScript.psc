@@ -7,26 +7,26 @@ ObjectReference Property ShelfContainer Auto
 Bool Property AlreadyLoaded = FALSE Auto 
 
 
-EVENT OnCellLoad()
+event OnCellLoad()
 	if AlreadyLoaded == FALSE
 		ShelfContainer = GetLinkedRef()
 		AlreadyLoaded = TRUE
 	endif
-endEVENT
+endEvent
 
 
-auto STATE WaitForBooks
+auto state WaitForBooks
 
-	EVENT OnBeginState()
+	event OnBeginState()
 		;Trace(self + " BOOKTRIGGER - Waiting For Books!")
-	endEVENT
+	endEvent
 
-	EVENT OnTriggerEnter(ObjectReference TriggerRef)
+	event OnTriggerEnter(ObjectReference TriggerRef)
 		;Trace("DARYL - " + self + " Reference " + TriggerRef + " has ENTERED")
 
 	endEvent
 
-	EVENT OnTriggerLeave(ObjectReference TriggerRef)
+	event OnTriggerLeave(ObjectReference TriggerRef)
 		; Reference has left this trigger
 		if GetParentCell().IsAttached()
 			;Trace("DARYL - " + self + " Reference " + TriggerRef + " has EXITED")
@@ -37,7 +37,7 @@ auto STATE WaitForBooks
 				; Player isnt' grabbing this reference, check to see if it's in the container.
 				if Shelfcontainer.GetItemCount(TriggerRef.GetBaseObject()) >= 1
 					;debug.TraceAndBox("In Trigger Script; Item Removed: "+TriggerRef.GetName())
-					;Shelfcontainer.RemoveItem(TriggerRef.GetBaseObject(), 1)
+					Shelfcontainer.RemoveItem(TriggerRef.GetBaseObject(), 1)
 					;(Shelfcontainer as autoDeckContainerBase).CurrentBookAmount = (Shelfcontainer as autoDeckContainerBase).CurrentBookAmount - 1
 					;(ShelfContainer as autoDeckContainerBase).RemoveBooks((TriggerRef.GetBaseObject()), 1)
 				else
@@ -48,11 +48,11 @@ auto STATE WaitForBooks
 		endif
 	endEvent
 
-endSTATE
+endState
 
 
-STATE IgnoreBooks
-	Event OnBeginState()
+state IgnoreBooks
+	event OnBeginState()
 		;Trace(self + " BOOKTRIGGER - Ignoring Books!")
-	endEVENT
-endSTATE
+	endEvent
+endState

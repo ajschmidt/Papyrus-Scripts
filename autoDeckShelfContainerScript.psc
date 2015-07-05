@@ -14,11 +14,16 @@ Keyword Property VendorItemOreIngot Auto
 Keyword Property VendorItemPotion Auto
 Keyword Property VendorItemPoison Auto
 Keyword Property VendorItemFood Auto
-ObjectReference Property BookMarkerLate Auto Hidden
 
-Bool Property adAlreadyLoaded2 = FALSE Auto Hidden
-Bool Property adAlreadyLoaded8 = FALSE Auto Hidden
-Bool Property containerFull = FALSE Auto Hidden 
+;ObjectReference Property BookMarkerLate Auto hidden
+;Bool Property adAlreadyLoaded2 = FALSE Auto hidden
+;Bool Property adAlreadyLoaded8 = FALSE Auto hidden
+;Bool Property containerFull = FALSE Auto hidden 
+ObjectReference Property BookMarkerLate Auto 
+Bool Property adAlreadyLoaded2 = FALSE Auto 
+Bool Property adAlreadyLoaded8 = FALSE Auto
+Bool Property containerFull = FALSE Auto 
+
 Bool shelfFull = FALSE 
 
 float minSize = 1.2

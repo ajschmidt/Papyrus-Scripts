@@ -149,6 +149,7 @@ int TotalItems = 0
 int[] TallFormIds = None
 int[] DishIds = None
 int[] BulkyIds = None
+int[] FlawlessIds = None
 
 Form[] inventoryRef = None
 autoDeckContainerBase[] refreshList = None
@@ -174,6 +175,7 @@ event OnCellLoad()
 	initTallContainers()
 	initTallForms()
 	initDishIds()
+	initFlawlessIds()
 	initBulkyIds()
 	initTrollSkullContainers()
 endEvent
@@ -196,36 +198,36 @@ function initPotionContainers()
 endFunction
 
 function initMixedContainers()
-	MixedContainers =  new autoDeckContainerBase[56]
+	MixedContainers =  new autoDeckContainerBase[28]
 	SpillOverContainers =  new autoDeckContainerBase[1]
 	MixedContainers[0] = Mixed01
-	MixedContainers[2] = Mixed02
-	MixedContainers[4] = Mixed03
-	MixedContainers[6] = Mixed04
-	MixedContainers[8] = Mixed05
-	MixedContainers[10] = Mixed06
-	MixedContainers[12] = Mixed07
-	MixedContainers[14] = Mixed08
-	MixedContainers[16] = Mixed09
-	MixedContainers[18] = Mixed10
-	MixedContainers[20] = Mixed11
-	MixedContainers[22] = Mixed12
-	MixedContainers[24] = Mixed13
-	MixedContainers[26] = Mixed14
-	MixedContainers[28] = Mixed15
-	MixedContainers[30] = Mixed16
-	MixedContainers[32] = Mixed17
-	MixedContainers[34] = Mixed18
-	MixedContainers[36] = Mixed19
-	MixedContainers[38] = Mixed20
-	MixedContainers[40] = Mixed21
-	MixedContainers[42] = Mixed22
-	MixedContainers[44] = Mixed23
-	MixedContainers[46] = Mixed24
-	MixedContainers[48] = Mixed25
-	MixedContainers[50] = Mixed26
-	MixedContainers[52] = Mixed27
-	MixedContainers[54] = Mixed28
+	MixedContainers[1] = Mixed02
+	MixedContainers[2] = Mixed03
+	MixedContainers[3] = Mixed04
+	MixedContainers[4] = Mixed05
+	MixedContainers[5] = Mixed06
+	MixedContainers[6] = Mixed07
+	MixedContainers[7] = Mixed08
+	MixedContainers[8] = Mixed09
+	MixedContainers[9] = Mixed10
+	MixedContainers[10] = Mixed11
+	MixedContainers[11] = Mixed12
+	MixedContainers[12] = Mixed13
+	MixedContainers[13] = Mixed14
+	MixedContainers[14] = Mixed15
+	MixedContainers[15] = Mixed16
+	MixedContainers[16] = Mixed17
+	MixedContainers[17] = Mixed18
+	MixedContainers[18] = Mixed19
+	MixedContainers[19] = Mixed20
+	MixedContainers[20] = Mixed21
+	MixedContainers[21] = Mixed22
+	MixedContainers[22] = Mixed23
+	MixedContainers[23] = Mixed24
+	MixedContainers[24] = Mixed25
+	MixedContainers[25] = Mixed26
+	MixedContainers[26] = Mixed27
+	MixedContainers[27] = Mixed28
 	SpillOverContainers[0] = Mixed28
 	setOverflowContainer(MixedContainers)
 	;setOverflowContainer(SpillOverContainers)
@@ -410,6 +412,22 @@ function initDishIds()
         DishIds[i] = 958979
 endFunction
 
+function initFlawlessIds()
+	FlawlessIds = new int[6]
+	int i = 0
+        FlawlessIds[i] = 427294
+	i += 1
+        FlawlessIds[i] = 427295
+	i += 1
+        FlawlessIds[i] = 427296
+	i += 1
+        FlawlessIds[i] = 427297
+	i += 1
+        FlawlessIds[i] = 427298
+	i += 1
+        FlawlessIds[i] = 427299
+endFunction
+
 function initBulkyIds()
 	BulkyIds = new int[1]
 	int i = 0
@@ -505,6 +523,8 @@ event OnActivate(ObjectReference akActionRef)
 		index += 1
 	endWhile
 
+        ; now that all of the items have been placed in containers
+        ; iterate through and activate each
 	Wait(3)
 	end = 128
 	index = 0
@@ -521,6 +541,8 @@ event OnActivate(ObjectReference akActionRef)
 	endWhile
 	
 	self.BlockActivation(false)
+        ; everything that did not fit in the designated container got put back in the
+        ; autodeck so activate it again
 	if again 
 		Wait(5)
 		self.Activate(self)
@@ -688,8 +710,10 @@ bool function isGem(Form akActionRef)
 
 	if (akActionRef.HasKeyword(VendorItemGem))
 		return true
-	else
-		return false;
+	elseif (containsInt(akActionRef.getFormID(), 6, FlawlessIds))
+                return true
+        else
+		return false
 	endif
 	
 endFunction

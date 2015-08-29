@@ -144,11 +144,12 @@ GlobalVariable Property AutoDeckGlobal Auto
 
 int BookCounter = 0
 int AddCounter = 0
-int MaxItems = 640
+int MaxItems = 384
 int TotalItems = 0
 int[] TallFormIds = None
 int[] DishIds = None
 int[] BulkyIds = None
+int[] SkullIds = None
 int[] FlawlessIds = None
 
 Form[] inventoryRef = None
@@ -177,6 +178,7 @@ event OnCellLoad()
 	initDishIds()
 	initFlawlessIds()
 	initBulkyIds()
+	initSkullIds()
 	initTrollSkullContainers()
 endEvent
 
@@ -434,6 +436,18 @@ function initBulkyIds()
         BulkyIds[i] = 624165
 endFunction
 
+function initSkullIds()
+	SkullIds = new int[4]
+	int i = 0
+        SkullIds[i] = 718333
+	i += 1
+        SkullIds[i] = 481384
+	i += 1
+        SkullIds[i] = 1009511
+	i += 1
+        SkullIds[i] = 647199
+endFunction
+
 function setOverflowContainer(autoDeckContainerBase[] containers)
 	int index = containers.length - 1
 	while index >= 0
@@ -569,9 +583,9 @@ function placeItems(Form akActionRef, int itemCount, int rotation)
 		placed = findOpeningAndPlace(SpillOverContainers, akActionRef, itemCount)
 	elseif (isIngot(akActionRef))
 		placed = findOpeningAndPlace(IngotContainers, akActionRef, itemCount)
-	elseif (akActionRef.getName() == "Skull")
+	elseif (containsInt(akActionRef.getFormID(), 4, SkullIds))
 		placed = findOpeningAndPlace(SkullContainers, akActionRef, itemCount)
-	elseif (akActionRef.getName() == "Troll Skull")
+	elseif (akActionRef.getFormId() == 203236)
 		placed = findOpeningAndPlace(TrollSkullContainers, akActionRef, itemCount)
 	elseif (akActionRef.HasKeyword(VendorItemJewelry))
 		placed = findOpeningAndPlace(JewelryContainers, akActionRef, itemCount)
@@ -585,12 +599,6 @@ function placeItems(Form akActionRef, int itemCount, int rotation)
 		placed = findOpeningAndPlace(PotionContainers, akActionRef, itemCount)
 	elseif(isSpellBook(akActionRef))
 		placed = findOpeningAndPlace(BookContainers, akActionRef, itemCount)
-		;placed = true
-		;if (Books03 && !Books03.isFull())
-			;placeItem(Books03, akActionRef, itemCount) 
-		;else
-			;placed = false
-		;endif
 	elseif (isBook(akActionRef))
 		placed = findOpeningAndPlace(BookContainers, akActionRef, itemCount)
 	elseif (isDish(akActionRef))
@@ -749,7 +757,7 @@ bool function isKey(Form akActionRef)
 endFunction
 
 bool function isDish(Form akActionRef)
-debug.trace("isDish() Name: "+akActionRef.getName()+", FormID: "+akActionRef.getFormID())
+;debug.trace("isDish() Name: "+akActionRef.getName()+", FormID: "+akActionRef.getFormID())
 	
 	if (containsInt(akActionRef.getFormID(), 8, DishIds))
 		return true
@@ -759,7 +767,7 @@ debug.trace("isDish() Name: "+akActionRef.getName()+", FormID: "+akActionRef.get
 endFunction
 
 bool function isTall(Form akActionRef)
-debug.trace("isTall() Name: "+akActionRef.getName()+", FormID: "+akActionRef.getFormID())
+;debug.trace("isTall() Name: "+akActionRef.getName()+", FormID: "+akActionRef.getFormID())
 	
 	if (containsInt(akActionRef.getFormID(), 28, TallFormIds))
 		return true
